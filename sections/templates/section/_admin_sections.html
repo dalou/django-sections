@@ -1,0 +1,64 @@
+{% load format_filters %}
+<fieldset class="module aligned with-legend ">
+
+    <h2 class="legend">Sections</h2>
+
+        <a id="section-add-top" class="btn btn-large btn-primary">Ajouter une section</a>
+
+    <div id="sections" data-update="{% url 'section:update_section' %}" style="text-align:center;" >
+        {% for section in sections_and_unlinked %}
+        <div class="section">
+            {% if section.title %}
+                <a style="margin-top: 30px; font-size:26px; cursor:pointer; font-weight:bold;">{{ section.title }} (template : {{ section.template.name }})</a>
+
+            {% else %}
+                <a style="margin-top: 30px; font-size:26px; cursor:pointer; font-weight:bold;">Section {{ forloop.counter }} ({{ section.template.name }})</a>
+
+            {% endif %}
+
+            <iframe
+                data-src="{% url 'section:live-edit' %}?section_pk={{ section.pk }}&section_type={{ section.template.pk }}"
+                data-section-type="{{ section.template.pk }}"
+                data-section-pk="{{ section.pk }}"
+                data-remove="{% url 'section:remove_section' %}?section_pk={{ section.pk }}"
+                style="  width: 100%; border:0px; "></iframe>
+
+        </div>
+
+
+        {% endfor %}
+    </div>
+
+        <a id="section-add" class="btn btn-large btn-primary">Ajouter une section</a>
+
+        <div class="app app-modal" id="sections-add-modal" style="padding:15px 15px 15px 30px;" >
+            <div class="row">
+            {% for section in available_sections %}
+                <div class="span6" >
+                    <div style="margin-bottom:60px; position:relative;">
+                        <div style="position: absolute; background: rgba(0,0,0,0.5); min-height:200px; top:0px; bottom:0px; width:100%;  height:100%; left:0px; right:0px;  text-align:center;">
+                            <div style="padding-top:50px; margin-bottom:5px; color:white; font-size:18px;">{{ section.name }}</div>
+                            <button class="add-section btn btn-info" style=""
+                                data-src="{% url 'section:live-edit' %}?section_type={{ section.pk }}"
+                                data-section-type="{{ section.pk }}">
+                                Ajouter cette section
+                                <!--<img src="{{ STATIC_URL }}img/sections/{{ section }}.png" style="width:100%" />-->
+                            </button>
+                        </div>
+                        {% if section.image %}
+                        <img src="{{ section.image.url}}" style="width:100%" />
+                        {% else %}
+                    <iframe
+                src="{% url 'section:live-edit' %}?section_type={{ section.pk }}"
+                data-section-type="{{ section.pk }}"
+                style="  width: 100%; border:0px; "></iframe>
+                        {% endif %}
+                    </div>
+
+                </div>
+                {% cycle '' '</div><div class="row">' %}
+            {% endfor %}
+            </div>
+        </div>
+
+</fieldset>
