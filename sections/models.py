@@ -128,7 +128,7 @@ class Page(MPTTModel):
 
         super(Page, self).save(*args, **kwargs)
 
-        Save.tree.rebuild()
+        Page.tree.rebuild()
 
 
 
