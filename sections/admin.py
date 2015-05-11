@@ -20,7 +20,7 @@ from tinymce.widgets import TinyMCE
 from mptt.admin import MPTTModelAdmin
 from feincms.admin import tree_editor
 
-from apps.section.models import Page, Section, SECTIONS, Template
+from sections.models import Page, Section, SECTIONS, Template
 
 # class PageAdminForm(forms.ModelForm):
 #     theme_color = ColorField(label=u"Couleur", required=False)
@@ -37,9 +37,11 @@ class TemplateAdmin(admin.ModelAdmin):
 
     class Media:
         js = [
-            # settings.STATIC_URL + 'vendors/dropzone.min.js',
-            # settings.STATIC_URL + 'vendors/cropper.js',
-            settings.STATIC_URL + 'section/admin.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/ace.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/mode-html.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/mode-twig.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/mode-stylus.js',
+            settings.STATIC_URL + 'sections/js/templates.js',
             'js/select2.js',
             'vendors/jquery.datetimepicker.js',
             settings.STATIC_URL + 'vendors/jquery.smooth-scroll.min.js',
@@ -80,9 +82,10 @@ class PageAdmin(tree_editor.TreeEditor):
         'title',
         'order',
         'is_enabled',
+        'is_default',
     )
     list_display_links = ('name', )
-    list_editable = ('parent', 'order', 'is_enabled', )
+    list_editable = ('parent', 'order', 'is_enabled', 'is_default')
     list_filter = ()
     sortable_field = 'order'
 
@@ -118,7 +121,11 @@ class PageAdmin(tree_editor.TreeEditor):
         js = [
             # settings.STATIC_URL + 'vendors/dropzone.min.js',
             # settings.STATIC_URL + 'vendors/cropper.js',
-            settings.STATIC_URL + 'section/admin.js',
+            settings.STATIC_URL + 'sections/js/editor.js',
+            settings.STATIC_URL + 'sections/js/plugins/image.js',
+            settings.STATIC_URL + 'sections/js/plugins/image_background.js',
+            settings.STATIC_URL + 'sections/js/plugins/rich_text.js',
+            settings.STATIC_URL + 'sections/js/plugins/text.js',
             'js/select2.js',
             'vendors/jquery.datetimepicker.js',
             settings.STATIC_URL + 'vendors/jquery.smooth-scroll.min.js',

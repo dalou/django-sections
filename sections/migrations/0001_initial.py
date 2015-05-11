@@ -2,9 +2,10 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-import tinymce.models
 import jsonfield.fields
 import mptt.fields
+import libs.utils.files
+import tinymce.models
 
 
 class Migration(migrations.Migration):
@@ -33,7 +34,7 @@ class Migration(migrations.Migration):
                 ('rght', models.PositiveIntegerField(editable=False, db_index=True)),
                 ('tree_id', models.PositiveIntegerField(editable=False, db_index=True)),
                 ('level', models.PositiveIntegerField(editable=False, db_index=True)),
-                ('parent', mptt.fields.TreeForeignKey(related_name='children', blank=True, to='section.Page', null=True)),
+                ('parent', mptt.fields.TreeForeignKey(related_name='children', blank=True, to='sections.Page', null=True)),
             ],
             options={
                 'ordering': ('order', 'lft', 'tree_id'),
@@ -49,13 +50,12 @@ class Migration(migrations.Migration):
                 ('instance_id', models.PositiveIntegerField(null=True, blank=True)),
                 ('order', models.IntegerField(default=0, verbose_name='Ordre')),
                 ('is_enabled', models.BooleanField(default=True, verbose_name='Activ\xe9e')),
-                ('type', models.CharField(default=b'SectionResume', max_length=255, verbose_name='template')),
                 ('data', jsonfield.fields.JSONField(default={}, verbose_name=b'Data')),
                 ('instance_type', models.ForeignKey(blank=True, to='contenttypes.ContentType', null=True)),
-                ('page', models.ForeignKey(related_name='sections', blank=True, to='section.Page', null=True)),
+                ('page', models.ForeignKey(related_name='sections', blank=True, to='sections.Page', null=True)),
             ],
             options={
-                'ordering': ('order',),
+                'ordering': ('order', 'template'),
                 'verbose_name': 'Section',
             },
             bases=(models.Model,),
@@ -70,5 +70,27 @@ class Migration(migrations.Migration):
             options={
             },
             bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Template',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=255, verbose_name='Nom')),
+                ('source', models.TextField(default=b'Nouvelle section', verbose_name='source')),
+                ('image', models.ImageField(upload_to=libs.utils.files.unique_filename(b'sections/templates/images/%Y/%m/'), null=True, verbose_name='Image', blank=True)),
+                ('public_hash', models.CharField(max_length=64, null=True, verbose_name='Hash public', blank=True)),
+                ('order', models.IntegerField(default=0, verbose_name='Ordre')),
+                ('css', models.TextField(null=True, verbose_name='css', blank=True)),
+                ('stylus', models.TextField(null=True, verbose_name='stylus', blank=True)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.AddField(
+            model_name='section',
+            name='template',
+            field=models.ForeignKey(blank=True, to='sections.Template', null=True),
+            preserve_default=True,
         ),
     ]

@@ -26,15 +26,8 @@ from django.utils import importlib
 from django.template import Context, RequestContext, Template as DjangoTemplate
 from django.template.loader import get_template_from_string
 
-from libs.views import CreateUpdateViewMixin
-from libs.forms.fields import FRDateField, FRZipCodeField
-from libs.forms.fields import PriceField
-from libs.forms.widgets import ImageInput, FileInput, DatePickerInput
-from libs.forms import OwnerFormMixin
-from libs.utils import canonical_url_static
 
-
-from apps.section.models import Page, Section, Template, SectionImage, SECTIONS
+from sections.models import Page, Section, Template, SectionImage, SECTIONS
 
 logger = logging.getLogger(__name__)
 

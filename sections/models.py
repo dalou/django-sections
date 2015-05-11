@@ -34,6 +34,8 @@ from tinymce.models import HTMLField
 from libs.models.tracking import TrackingCreateAndUpdateMixin
 from libs.utils import canonical_url, unique_filename, random_token
 
+from stylus import Stylus
+compiler = Stylus()
 
 from libs.models.fields import CroppableImageField
 from lxml import etree
@@ -73,6 +75,7 @@ class Page(MPTTModel):
 
     order = models.IntegerField(u"Ordre", default=0)
     is_enabled = models.BooleanField(u"Activée", default=True)
+    is_default = models.BooleanField(u"Default ?", default=False)
 
     meta_title = models.CharField(u"Titre page web", max_length=254, blank=True, null=True, help_text=u"Si vide prend par défaut prend la valeur du 'Nom'")
     meta_description = models.TextField(u"Description page web", blank=True, null=True, help_text=u"Si vide prend par défaut prend la valeur du 'Nom'")
@@ -84,7 +87,7 @@ class Page(MPTTModel):
     type = models.CharField(max_length=254, choices=TYPE_CHOICES, default=TYPE_STANDARD, verbose_name=_(u"Type"))
 
     # objects = CategoryQueryset()
-    # tree = TreeManager()
+    tree = TreeManager()
 
     class Meta:
         ordering = ('order', 'lft', 'tree_id' )
@@ -147,6 +150,8 @@ class Template(models.Model):
     public_hash = models.CharField(_(u"Hash public"), max_length=64, blank=True, null=True)
     order = models.IntegerField(u"Ordre", default=0)
 
+    css = models.TextField(u"css", blank=True, null=True)
+    stylus = models.TextField(u"stylus", blank=True, null=True)
 
     def __unicode__(self):              # __unicode__ on Python 2
         return u"%s" % ( self.name )
@@ -175,7 +180,12 @@ class Template(models.Model):
             self.order = Template.objects.all().count()
         self.public_hash = random_token([self.name])
 
+        # if self.stylus:
+        #     self.css = compiler.compile(self.stylus)
+
         super(Template, self).save(*args, **kwargs)
+
+
 
 
         print "Template"
@@ -214,7 +224,7 @@ class Template(models.Model):
 
 class Section(models.Model):
 
-    page = models.ForeignKey('section.Page', related_name="sections", null=True, blank=True)
+    page = models.ForeignKey('sections.Page', related_name="sections", null=True, blank=True)
 
     title = models.CharField(u"Titre", max_length=255, default="Section 1")
 
@@ -225,7 +235,10 @@ class Section(models.Model):
 
     order = models.IntegerField(u"Ordre", default=0)
     is_enabled = models.BooleanField(u"Activée", default=True)
-    template = models.ForeignKey(u"section.Template", null=True, blank=True)
+    template = models.ForeignKey(u"sections.Template", null=True, blank=True)
+
+
+
 
     data = JSONField("Data", default={})
 
@@ -246,7 +259,7 @@ class Section(models.Model):
 
 
     def __str__(self):              # __unicode__ on Python 2
-        return u"%s - %s" % ( self.type, self.page )
+        return u"%s - %s" % ( self.template, self.page )
 
 class SectionImage(models.Model):
     path = models.CharField(u"path", max_length=255, default="/")

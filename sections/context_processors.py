@@ -3,7 +3,7 @@ import datetime
 
 from django.conf import settings
 
-from apps.section.models import Page
+from sections.models import Page
 
 
 def page(request):

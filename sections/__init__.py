@@ -1,1 +1,1 @@
-default_app_config = 'apps.section.app_configs.DefaultConfig'
+default_app_config = 'sections.app_configs.DefaultConfig'
