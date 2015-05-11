@@ -128,6 +128,8 @@ class Page(MPTTModel):
 
         super(Page, self).save(*args, **kwargs)
 
+        Save.tree.rebuild()
+
 
 
     def get_menu_title(self):
