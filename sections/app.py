@@ -31,9 +31,8 @@ class SectionApplication(Application):
         return self.post_process_urls(urlpatterns)
 
 
-    def get_url_decorator(self, url_name):
-        print url_name
-        if url_name == 'screenshot':
+    def get_url_decorator(self, pattern):
+        if pattern.name in ['screenshot', 'page-view']:
             return None
         return login_required
 
