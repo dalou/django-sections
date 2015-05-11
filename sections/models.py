@@ -136,7 +136,7 @@ class Page(MPTTModel):
     @models.permalink
     def get_absolute_url(self):
         if self.type == Page.TYPE_STANDARD:
-            return ('section:page-view', (), {'slug': self.slug, 'pk': self.pk})
+            return ('sections:page-view', (), {'slug': self.slug, 'pk': self.pk})
 
 mptt_register(Page,)
 
@@ -189,9 +189,9 @@ class Template(models.Model):
 
 
         print "Template"
-        print canonical_url(reverse('section:template-screenshot', kwargs={'hash': self.public_hash}))
+        print canonical_url(reverse('sections:template-screenshot', kwargs={'hash': self.public_hash}))
 
-        url=canonical_url(reverse('section:template-screenshot', kwargs={'hash': self.public_hash}))
+        url=canonical_url(reverse('sections:template-screenshot', kwargs={'hash': self.public_hash}))
 
         # if not settings.LOCAL_SERVER:
         #     r = requests.post("https://api.cloudconvert.com/convert?\

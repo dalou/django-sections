@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 
 
 class SectionApplication(Application):
-    name = 'section'
+    name = 'sections'
 
     def get_urls(self):
         urlpatterns = super(SectionApplication, self).get_urls()

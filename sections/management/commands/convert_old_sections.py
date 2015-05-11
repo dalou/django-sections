@@ -25,6 +25,7 @@ class Command(BaseCommand):
             page.navbar_theme = old_page.navbar_theme
             page.title = old_page.title
             page.resume = old_page.resume
+            page.slug = old_page.slug
             page.is_enabled = old_page.is_enabled
             page.meta_title = old_page.meta_title
             page.meta_description = old_page.meta_description
