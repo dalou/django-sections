@@ -71,6 +71,8 @@ class PageAdmin(tree_editor.TreeEditor):
     }
     sortable_field_name = "order"
 
+    list_max_show_all = 500
+
     # form = PageAdminForm
     inlines = (
         # SectionAdmin,
