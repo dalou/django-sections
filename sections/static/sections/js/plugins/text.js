@@ -24,11 +24,11 @@ sections_plugins['text'] = function($iframe, $field, options) {
             selector: '#'+id,
 
             plugins: [
-                "advlist autolink lists link image charmap print preview anchor",
-                "searchreplace visualblocks code fullscreen textcolor",
-                "insertdatetime media table contextmenu paste"
+                "advlist lists charmap print preview ",
+                "searchreplace visualblocks",
+                "insertdatetime contextmenu paste"
             ],
-            toolbar: "insertfile undo redo | styleselect | bold italic | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image"
+            toolbar: "insertfile undo redo | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent "
 
         });
         return false;

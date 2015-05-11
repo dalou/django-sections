@@ -116,6 +116,9 @@ $(document).ready(function(drop_trigger_count, SECTION_INIT, SECTIONS, SECTION_C
                     sections_plugins[options.type]($iframe, $field, options)
 
                 }
+                else {
+                    console.log('not found', options.type)
+                }
                 if(options.movable) {
                     $field.draggable($.extend(options.movable, {
                         containment: $field.parents('section'),

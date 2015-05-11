@@ -128,6 +128,7 @@ class PageAdmin(tree_editor.TreeEditor):
             settings.STATIC_URL + 'sections/js/plugins/image_background.js',
             settings.STATIC_URL + 'sections/js/plugins/rich_text.js',
             settings.STATIC_URL + 'sections/js/plugins/text.js',
+            settings.STATIC_URL + 'sections/js/plugins/char.js',
             'js/select2.js',
             'vendors/jquery.datetimepicker.js',
             settings.STATIC_URL + 'vendors/jquery.smooth-scroll.min.js',

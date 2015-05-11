@@ -13,7 +13,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for old_template in OldTemplate.objects.all():
             template, created = Template.objects.get_or_create(name=old_template.name)
-            template.source = old_template.source
+            template.source = old_template.source.replace('section:', 'sections:')
             template.image = old_template.image
             template.public_hash = old_template.public_hash
             template.order = old_template.order
@@ -46,7 +46,7 @@ class Command(BaseCommand):
 
 
             page.sections.all().delete()
-            for old_section in OldSection.objects.all():
+            for old_section in old_page.sections.all():
                 template = Template.objects.get(name=old_section.template.name)
                 section = Section.objects.create(
                     page=page,
