@@ -5,7 +5,7 @@
 
         <a id="section-add-top" class="btn btn-large btn-primary">Ajouter une section</a>
 
-    <div id="sections" data-update="{% url 'section:update_section' %}" style="text-align:center;" >
+    <div id="sections" data-update="{% url 'sections:update_section' %}" style="text-align:center;" >
         {% for section in sections_and_unlinked %}
         <div class="section">
             {% if section.title %}
@@ -17,10 +17,10 @@
             {% endif %}
 
             <iframe
-                data-src="{% url 'section:live-edit' %}?section_pk={{ section.pk }}&section_type={{ section.template.pk }}"
+                data-src="{% url 'sections:live-edit' %}?section_pk={{ section.pk }}&section_type={{ section.template.pk }}"
                 data-section-type="{{ section.template.pk }}"
                 data-section-pk="{{ section.pk }}"
-                data-remove="{% url 'section:remove_section' %}?section_pk={{ section.pk }}"
+                data-remove="{% url 'sections:remove_section' %}?section_pk={{ section.pk }}"
                 style="  width: 100%; border:0px; "></iframe>
 
         </div>
@@ -39,7 +39,7 @@
                         <div style="position: absolute; background: rgba(0,0,0,0.5); min-height:200px; top:0px; bottom:0px; width:100%;  height:100%; left:0px; right:0px;  text-align:center;">
                             <div style="padding-top:50px; margin-bottom:5px; color:white; font-size:18px;">{{ section.name }}</div>
                             <button class="add-section btn btn-info" style=""
-                                data-src="{% url 'section:live-edit' %}?section_type={{ section.pk }}"
+                                data-src="{% url 'sections:live-edit' %}?section_type={{ section.pk }}"
                                 data-section-type="{{ section.pk }}">
                                 Ajouter cette section
                                 <!--<img src="{{ STATIC_URL }}img/sections/{{ section }}.png" style="width:100%" />-->
@@ -49,7 +49,7 @@
                         <img src="{{ section.image.url}}" style="width:100%" />
                         {% else %}
                     <iframe
-                src="{% url 'section:live-edit' %}?section_type={{ section.pk }}"
+                src="{% url 'sections:live-edit' %}?section_type={{ section.pk }}"
                 data-section-type="{{ section.pk }}"
                 style="  width: 100%; border:0px; "></iframe>
                         {% endif %}

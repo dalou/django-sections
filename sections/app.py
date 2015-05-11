@@ -25,7 +25,7 @@ class SectionApplication(Application):
 
             url(r'^section/template/preview/$', views.section_preview, name="template-preview"),
 
-            url(r'^(?P<pk>[\d]+)/(?P<slug>[-_\w]+)$', views.PageView.as_view(), name="page-view"),
+            url(r'^(?P<pk>[\d]+)/(?P<slug>[-_\w]*)$', views.PageView.as_view(), name="page-view"),
 
         )
         return self.post_process_urls(urlpatterns)
