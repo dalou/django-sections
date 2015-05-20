@@ -62,6 +62,6 @@ class DefaultConfig(AppConfig):
                     section_obj.is_system = True
                     section_obj.is_ghost = False
                     section_obj.save()
-        except:
-            print 'APP_CONFIGS SECTIONS ERROR'
+        except Exception, e:
+            print 'APP_CONFIGS SECTIONS ERROR', e.message
 
