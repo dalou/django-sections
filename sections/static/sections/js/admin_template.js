@@ -1,6 +1,6 @@
 function screenshot(src, ifr) {
 
-    ifr = $('<iframe></iframe>').css({ width: '1200', zIndex: 1, position: "fixed", left: 0, top: 0 })
+    ifr = $('<iframe></iframe>').css({ width: '1200', zIndex: -1, position: "fixed", left: 0, top: 0 })
     $('body').append(ifr);
     ifr.attr('src', src)
         .on('load', function(self) {
@@ -8,7 +8,7 @@ function screenshot(src, ifr) {
         ifr.height(ifr.contents().height());
         ifr.contents().find('html,body').css('background', 'transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP4Xw8AAoABf5/NhYYAAAAASUVORK5CYII=) repeat !important')
         setTimeout(function() {
-            html2canvas(ifr.contents().find('html')).then(function(canvas) {
+            html2canvas(ifr.contents().find('html,body')).then(function(canvas) {
                 dataURL = canvas.toDataURL("image/png");
                 $('#id_base64').val(dataURL).next().attr('src', dataURL);
                 ifr.remove();

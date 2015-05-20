@@ -285,7 +285,7 @@ class Template(models.Model):
         if not self.public_hash:
             self.public_hash = random_token([self.name])
 
-        if self.base64:
+        if not self.image and self.base64:
 
             base64 = self.base64.replace("data:image/png;base64,", "")
 
