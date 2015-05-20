@@ -69,21 +69,20 @@ Element.prototype.load = function($element, self) {
 
         self.$container.on('click', '.editor-element-container-actions button.prev', function(e) {
             moveUp(self.elements, self)
-            self.section.update(true)
+            self.section.update()
         });
         self.$container.on('click', '.editor-element-container-actions button.next', function(e) {
             moveDown(self.elements, self)
-            self.section.update(true)
+            self.section.update()
         });
         self.$container.on('click', '.editor-element-container-actions button.delete', function(e) {
-            if(confirm('Delete this section ?')) {
+            if(confirm('Delete this contained element ?')) {
                 self.remove();
             }
         });
         self.$container.on('click', '.editor-element-container-actions button.add', function(e) {
-            var $clone = self.$element.clone();
-            self.elements.push(new Element(self.section, $clone))
-            self.section.update(true)
+
+            self.parent.add_element()
         });
 
         self.section.$editor.append(self.$container);
@@ -155,10 +154,32 @@ Element.prototype.close_editor = function(self) {
     self.section.close_editor();
 };
 
+
+Element.prototype.add_element = function(self) {
+    self = this;
+    data = self.to_data(true);
+    console.log('BEFORE', self.elements)
+    console.log(data.container)
+    for(var i in data.container) {
+        if(i == 0) {
+            for(var rname in data.container[i]) {
+                var toremove = data.container[i][rname];
+
+                var $clone = toremove.$element.clone();
+                self.elements.push(new Element(self.section, $clone))
+            }
+        }
+    }
+    console.log('AFTER', self.elements)
+    self.section.update(function(page) {
+        console.log('RELOAD AFTER ELEMENT ADD', page)
+    })
+}
+
 Element.prototype.remove = function(self) {
     self = this;
     if(self.parent) {
-        data = self.parent.to_data();
+        data = self.parent.to_data(true);
         for(var i in data.container) {
             for(var name in data.container[i]) {
                 if(data.container[i][name] == self) {
@@ -179,7 +200,7 @@ Element.prototype.remove = function(self) {
     })
 }
 
-Element.prototype.to_data = function(self) {
+Element.prototype.to_data = function(with_element, self) {
     self = this;
     var data = self.data;
     if(self.elements.length) {
@@ -200,7 +221,7 @@ Element.prototype.to_data = function(self) {
                 if(!data.container[j]) {
                    data.container[j] = {}
                 }
-                data.container[j][i] = by_names[i][j].to_data()
+                data.container[j][i] = with_element ? by_names[i][j] : by_names[i][j].to_data()
             }
         }
     }

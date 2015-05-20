@@ -192,12 +192,7 @@ Editor.prototype.update_page = function(data, reload, self) {
 Editor.prototype.insert_template = function($template, self) {
     self = this
     if(self.current_page) {
-        this.update_section({
-            page: self.current_page.pk,
-            template: $template.data('pk'),
-            order: 0,
-            data: {}
-        }, true)
+        new Section(self.current_page, $template.data('pk') );
     }
 };
 Editor.prototype.template_screenshot = function($template, self) {
