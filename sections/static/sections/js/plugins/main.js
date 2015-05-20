@@ -50,28 +50,30 @@ PageEditor.add_input('image', {
 PageEditor.add_input('tinymce', {
     set_field: function(elm, opt, change, $field) {
         var id = (new Date().getTime() + Math.random()).toString().replace('.','_');
-        $field = $('<div id="'+id+'">\
-            <textarea ></textarea>\
+        $field = $('<div >\
+            <textarea id="'+id+'"></textarea>\
             <a class="apply btn btn-primary btn-lg btn-block" href="#">Apply</a>\
         </div>');
         $field.find('textarea').val(elm.value);
         $field.on('click', 'a.apply', function() {
-
-            change(tinymce.activeEditor.getContent())
-
+            change($field[0].tinymce.getContent());
         })
 
 
         return $field;
     },
     init: function(elm, opt, change) {
-        tinymce.init({
-            selector: '#'+elm.$field.attr('id')+' textarea',
+        var tmce = tinymce.init({
+            selector: '#'+elm.$field.find('textarea').attr('id'),
             plugins: [
                 "advlist autolink lists link image charmap print preview anchor",
                 "searchreplace visualblocks code fullscreen textcolor",
                 "insertdatetime media table contextmenu paste"
             ],
+            init_instance_callback : function(editor) {
+                elm.$field[0].tinymce = editor
+                console.log(elm.$field, editor)
+            },
             menubar: false,
             toolbar_items_size: 'small',
             toolbar: "insertfile undo redo | styleselect | bold italic | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image"
