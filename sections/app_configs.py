@@ -62,10 +62,21 @@ class DefaultConfig(AppConfig):
                 category_obj.is_ghost = False
                 category_obj.save()
                 for section in sections:
-                    section_obj, created = models.Template.objects.get_or_create(
-                        category=category_obj,
-                        name=section.split('/')[-1].replace('.html', '')
-                    )
+                    try:
+                        section_obj, created = models.Template.objects.get_or_create(
+                            category=category_obj,
+                            name=section.split('/')[-1].replace('.html', '')
+                        )
+                    except:
+                        duplicates = models.Template.objects.filter(
+                            category=category_obj,
+                            name=section.split('/')[-1].replace('.html', '')
+                        )
+                        saved = duplicates.first()
+                        duplicates.exclude(pk=saved.pk).delete()
+
+                        section_obj, created = saved, False
+
                     section_obj.source = open(section, 'rb').read()
                     section_obj.is_system = True
                     section_obj.is_ghost = False
