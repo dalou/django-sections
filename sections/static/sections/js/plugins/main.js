@@ -244,10 +244,20 @@ PageEditor.add_value('href', {
 PageEditor.add_value('image', {
     input: 'image', tab: 'image',
     get_value: function(elm, opt) {
-        return elm.$elm.attr('src');
+        if(elm.$elm.is('img')) {
+            return elm.$elm.attr('src');
+        }
+        else {
+            return elm.$elm.find('img').eq(0).attr('src');
+        }
     },
     set_value: function(elm, opt) {
-        elm.$elm.attr('src', elm.value);
+        if(elm.$elm.is('img')) {
+            elm.$elm.attr('src', elm.value);
+        }
+        else {
+            elm.$elm.find('img').eq(0).attr('src', elm.value);
+        }
         return elm.value;
     }
 })

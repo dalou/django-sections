@@ -116,6 +116,7 @@ Element.prototype.load = function($element, self) {
             e.stopPropagation();
         }
         self.section.propagate = false;
+        e.preventDefault();
     })
 
     if(self.options.styles) {
@@ -158,8 +159,6 @@ Element.prototype.close_editor = function(self) {
 Element.prototype.add_element = function(self) {
     self = this;
     data = self.to_data(true);
-    console.log('BEFORE', self.elements)
-    console.log(data.container)
     for(var i in data.container) {
         if(i == 0) {
             for(var rname in data.container[i]) {
@@ -170,7 +169,6 @@ Element.prototype.add_element = function(self) {
             }
         }
     }
-    console.log('AFTER', self.elements)
     self.section.update(function(page) {
         console.log('RELOAD AFTER ELEMENT ADD', page)
     })
