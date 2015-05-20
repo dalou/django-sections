@@ -5,7 +5,7 @@
 <ul>
     {% for template in templates %}
         <li class="template" data-pk="{{ template.pk }}" {% if template.need_thumbnail %}data-need-thumbnail="1"{% endif %}>
-            <img src="{{ template.image.url|default:"" }}" >
+            <img {% if template.image %}src="{{ template.image.url|default:"" }}"{% endif %} >
             <div class="editor-template-actions">
                 <button type="button" class="insert btn btn-danger btn-sm deleteBlock"><span class="fui-plus"></span></button>
                 <!-- <button type="button" class="thumbnail btn btn-inverse btn-sm htmlBlock"><span class="fui-triangle-up"></span> </button> -->
