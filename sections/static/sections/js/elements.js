@@ -270,7 +270,7 @@ Element.prototype.load_data = function(data, type, self, $field) {
                 var real_value = $.trim(self.$element.text());
             }
         }
-        self.data.styles[data.name] = real_value;
+        self.data[type][data.name] = real_value;
 
 
         var input = self.editor.inputs[data.input];
