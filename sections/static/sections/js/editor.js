@@ -103,6 +103,7 @@ Editor.prototype.init = function(data, self) {
     self.$page.load(function() {
 
         self.close_editor();
+        self.close_templates();
         self.$editor.empty();
 
         var page = new Page(self, self.$page);
