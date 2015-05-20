@@ -166,8 +166,12 @@ def editor_section_update(request):
     else:
         section = Section()
 
+
     if data.get('page'):
         page = Page.objects.get(pk=data.get('page'))
+        if not section.pk:
+            section.order = page.sections.count()
+
         section.page = page
 
     if data.get('template'):

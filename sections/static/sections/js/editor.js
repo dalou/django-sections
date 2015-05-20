@@ -200,7 +200,7 @@ Editor.prototype.template_screenshot = function($template, self) {
     self = this
 
     $template.addLoading();
-    ifr = $('<iframe></iframe>').css({ width: '1200', position: "fixed", left: -9999, top: -9999 })
+    ifr = $('<iframe></iframe>').css({ width: '1200', height: '100%', zIndex: 1, position: "fixed", left: -9999, top: -9999 })
     $('body').append(ifr);
     ifr.attr('src', '/admin/section/editor/template/screenshot/'+$template.data('pk')+'/')
         .on('load', function(self) {
@@ -215,7 +215,7 @@ Editor.prototype.template_screenshot = function($template, self) {
                     $template.removeLoading();
                 })
             });
-        }, 3000);
+        }, 5000);
     });
 }
 Editor.prototype.open_templates = function(self) {
