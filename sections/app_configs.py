@@ -12,10 +12,10 @@ class DefaultConfig(AppConfig):
 
 
         from . import models
-        models.Section.objects.filter(template=None).delete()
-        models.Section.objects.filter(is_system=False).delete()
         # models.Template.objects.all().delete()
         try:
+            models.Section.objects.filter(template=None).delete()
+            models.Section.objects.filter(is_system=False).delete()
 
             models.Template.objects.filter(is_system=True).update(is_system=False, is_ghost=True)
             models.TemplateCategory.objects.filter(is_system=True).update(is_system=False, is_ghost=True)
