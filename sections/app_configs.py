@@ -54,7 +54,7 @@ class DefaultConfig(AppConfig):
                 except:
                     duplicates = models.TemplateCategory.objects.filter(name=category)
                     saved = duplicates.first()
-                    duplicates.exlclude(pk=saved.pk).delete()
+                    duplicates.exclude(pk=saved.pk).delete()
 
                     category_obj, created = saved, False
 
