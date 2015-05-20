@@ -65,7 +65,6 @@ PageEditor.add_input('tinymce', {
         return $field;
     },
     init: function(elm, opt, change) {
-        console.log(elm.$field.parent()[0], '#'+elm.$field.attr('id'))
         tinymce.init({
             selector: '#'+elm.$field.attr('id')+' textarea',
             plugins: [
