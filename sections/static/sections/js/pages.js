@@ -2,10 +2,17 @@
 function Page(editor, $page, self) {
     self = this
 
-    self.$page = $page;
-    self.pk = $page.data('page');
     self.editor = editor;
+    self.editor.current_page = self;
+    self.$page_iframe = $page;
+    console.log(self.$page_iframe.contents().document)
+    self.url = self.$page_iframe.contents().document.location.href
+    self.$page_menu = self.editor.$pages_menu.find('[data-url="'+self.url+'"]')
+    self.pk = self.$page_menu.data('pk');
+    self.$page = self.$page_iframe.contents();
     self.sections = [];
+
+    $('#pageTitle').text(self.$page_menu.data('name') + ' (id: '+self.pk+')')
 
     self.$page.find('[data-section]').each(function() {
 
@@ -15,7 +22,18 @@ function Page(editor, $page, self) {
     self.$page.click(function() {
         $('nav .dropdown').removeClass('open');
     });
+
 };
+Page.prototype.reload = function(callback, self) {
+    self = this;
+    self.editor.close_editor();
+    self.editor.$editor.empty();
+    if(callback) {
+        self.editor.page_load_callback = callback
+    }
+    self.$page_iframe.attr('src', self.url + '?rand='+ (new Date().getTime()))
+
+}
 Page.prototype.reorder_sections = function(orders, self) {
     self = this;
     orders = []

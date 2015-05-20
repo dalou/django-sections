@@ -162,7 +162,7 @@ def editor_section_update(request):
 
     data = json.loads(request.body)
     if data.get('section'):
-        section = Section.objects.get(pk=data.get('section'))
+        section = Section.objects.select_related('page', 'template').get(pk=data.get('section'))
     else:
         section = Section()
 
@@ -178,7 +178,12 @@ def editor_section_update(request):
         section.data = data.get('data')
 
     section.save()
-    return JsonResponse(data.get('data'))
+    return JsonResponse({
+        'section': section.pk,
+        'page': section.page.pk,
+        'template': section.template.pk,
+        'data': data.get('data')
+    }, safe=False)
 
     # return render_to_response("sections/_editor_section.html", {
     #     "section": section,

@@ -14,8 +14,8 @@ class DefaultConfig(AppConfig):
         from . import models
         # models.Template.objects.all().delete()
         try:
+            models.Template.objects.filter(is_system=False).delete()
             models.Section.objects.filter(template=None).delete()
-            models.Section.objects.filter(is_system=False).delete()
 
             models.Template.objects.filter(is_system=True).update(is_system=False, is_ghost=True)
             models.TemplateCategory.objects.filter(is_system=True).update(is_system=False, is_ghost=True)
@@ -47,9 +47,6 @@ class DefaultConfig(AppConfig):
                         SECTIONS['Autres'] = []
                     SECTIONS['Autres'].append(section_path)#.replace('.html', ''))
 
-            import pprint
-            pprint.pprint(SECTIONS)
-
             for category, sections in SECTIONS.items():
 
                 category_obj, created = models.TemplateCategory.objects.get_or_create(name=category)
@@ -66,5 +63,5 @@ class DefaultConfig(AppConfig):
                     section_obj.is_ghost = False
                     section_obj.save()
         except:
-            pass
+            print 'APP_CONFIGS SECTIONS ERROR'
 

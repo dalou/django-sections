@@ -102,9 +102,14 @@ Editor.prototype.init = function(data, self) {
     /************** PAGES ***************/
     self.$page.load(function() {
 
-        var $page = self.$page.contents();
-        $page.data('page', self.current_page_pk)
-        self.current_page = new Page(self, $page);
+        self.close_editor();
+        self.$editor.empty();
+
+        var page = new Page(self, self.$page);
+        if(self.page_load_callback) {
+            self.page_load_callback(page)
+            self.page_load_callback = null;
+        }
         $.fn.removeLoadingFull();
     });
 
@@ -155,7 +160,7 @@ Editor.prototype.init = function(data, self) {
         $.fn.addLoadingFull();
         $('#pageTitle').text($(this).data('name'))
         self.close_editor();
-        self.current_page_pk = $(this).data('pk')
+        //self.current_page_pk = $(this).data('pk')
         self.$page.attr('src', $(this).data('url'))
 
         // e.stopPropagation();
@@ -183,24 +188,6 @@ Editor.prototype.update_page = function(data, reload, self) {
     });
 };
 
-
-Editor.prototype.update_section = function(data, reload, self) {
-    self = this
-    $.ajax({
-        method: 'POST',
-        url: '/admin/sections/editor/section/update/',
-        data: JSON.stringify(data),
-        contentType: 'application/json; charset=utf-8',
-        dataType: 'json',
-        headers: {'content-type': 'application/json'},
-        success: function(data) {
-            console.log(data)
-            if(reload) {
-                self.$page.attr('src', self.$page.attr('src') + '?rand='+ (new Date().getTime()))
-            }
-        }
-    });
-};
 
 Editor.prototype.insert_template = function($template, self) {
     self = this
