@@ -72,7 +72,6 @@ PageEditor.add_input('tinymce', {
             ],
             init_instance_callback : function(editor) {
                 elm.$field[0].tinymce = editor
-                console.log(elm.$field, editor)
             },
             menubar: false,
             toolbar_items_size: 'small',

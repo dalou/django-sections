@@ -135,6 +135,7 @@ Section.prototype.update = function(callback, self) {
         section: self.pk,
         data: self.to_data()
     }
+     console.log('SECTION BEFORE UPDATE', data)
     $.ajax({
         method: 'POST',
         url: '/admin/sections/editor/section/update/',
@@ -143,7 +144,7 @@ Section.prototype.update = function(callback, self) {
         dataType: 'json',
         headers: {'content-type': 'application/json'},
         success: function(data) {
-            console.log(data)
+            console.log('SECTION UPDATED', data)
             if(callback) {
                 self.page.reload(callback)
             }
