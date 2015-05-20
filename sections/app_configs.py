@@ -49,7 +49,15 @@ class DefaultConfig(AppConfig):
 
             for category, sections in SECTIONS.items():
 
-                category_obj, created = models.TemplateCategory.objects.get_or_create(name=category)
+                try:
+                    category_obj, created = models.TemplateCategory.objects.get_or_create(name=category)
+                except:
+                    duplicates = models.TemplateCategory.objects.filter(name=category)
+                    saved = duplicates.first()
+                    duplicates.exlclude(pk=saved.pk).delete()
+
+                    category_obj, created = saved, False
+
                 category_obj.is_system = True
                 category_obj.is_ghost = False
                 category_obj.save()
