@@ -23,6 +23,8 @@ from django.contrib.admin.templatetags.admin_urls import admin_urlname
 from django.core.files.base import ContentFile
 from django.template.loader import get_template, render_to_string, get_template_from_string
 from django.template import Context, RequestContext, Template as DjangoTemplate
+import base64 as base64_original
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 from tinymce.models import HTMLField
@@ -221,6 +223,9 @@ class TemplateCategory(models.Model):
     is_system = models.BooleanField(u"Systeme ?", default=False)
     is_ghost = models.BooleanField(u"Fantome ?", default=False)
 
+    def __unicode__(self):
+        return u"%s" % ( self.name )
+
 class Template(models.Model):
 
     category = models.ForeignKey('sections.TemplateCategory', related_name="templates", null=True, blank=True)
@@ -279,6 +284,14 @@ class Template(models.Model):
             self.order = Template.objects.all().count()
         if not self.public_hash:
             self.public_hash = random_token([self.name])
+
+        if self.base64:
+
+            base64 = self.base64.replace("data:image/png;base64,", "")
+
+            png_recovered = base64_original.decodestring(base64)
+            self.image = SimpleUploadedFile('uploaded_file.png', png_recovered, content_type='image/png')
+            self.base64 = None
 
         # if self.stylus:
         #     self.css = compiler.compile(self.stylus)

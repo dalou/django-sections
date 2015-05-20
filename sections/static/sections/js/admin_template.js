@@ -1,3 +1,21 @@
+function screenshot(src, ifr) {
+
+    ifr = $('<iframe></iframe>').css({ width: '1200', zIndex: 1, position: "fixed", left: -9999, top: -9999 })
+    $('body').append(ifr);
+    ifr.attr('src', src)
+        .on('load', function(self) {
+        self = $(this);
+        ifr.height(ifr.contents().height());
+        ifr.contents().find('html').css('background-image', 'url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7) !important')
+        setTimeout(function() {
+            html2canvas(ifr.contents().find('html')).then(function(canvas) {
+                dataURL = canvas.toDataURL("image/png");
+                $('#id_base64').val(dataURL)
+            });
+        }, 3000);
+    });
+}
+
 $(document).ready(function(UPDATE, QUERY_TO) {
   if($('#id_source').length) {
     $('#id_source').hide().before(
@@ -5,23 +23,30 @@ $(document).ready(function(UPDATE, QUERY_TO) {
     ).after(
       $('<iframe  style="border:0px; width:100%;" id="id_source_preview"></iframe>')
     )
+    $('#id_base64').hide();
     QUERY_TO = null;
     UPDATE = function() {
       $('#id_source').val(editor.getValue());
       $('#id_css').val(editor_css.getValue());
-      $.post('/section/template/preview/', { source: editor.getValue()}, function() {
+      $.post('/section/template/preview/', { source: editor.getValue()}, function(ifr) {
           $('#id_source_preview').attr('src', '/section/template/preview/').on('load', function(self) {
-            self = $(this)
-            $(this).height($(this).contents().height());
+            ifr = $(this)
+            ifr.height(ifr.contents().height());
+            ifr.contents().find('html,body').css('background-image', 'url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7) !important')
+            ifr.contents().click(function() {
+                ifr.height(ifr.contents().height());
 
-            setTimeout(function() {
-               html2canvas(self.contents().find('html')).then(function(canvas) {
-                  $('#id_source_preview').after(canvas);
+            })
+            screenshot('/section/template/preview/')
 
-                  dataURL = canvasRecord.toDataURL("image/png");
-              });
+            // setTimeout(function() {
+            //    html2canvas(self.contents().find('html')).then(function(canvas) {
+            //       $('#id_source_preview').after(canvas);
 
-            }, 2000);
+            //       dataURL = canvasRecord.toDataURL("image/png");
+            //   });
+
+            // }, 2000);
 
           })
       })

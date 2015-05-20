@@ -5,7 +5,6 @@ function Page(editor, $page, self) {
     self.editor = editor;
     self.editor.current_page = self;
     self.$page_iframe = $page;
-    console.log(self.$page_iframe.contents().get(0).location.pathname, self.$page_iframe.attr('src'))
     self.url = self.$page_iframe.contents().get(0).location.pathname
     self.$page_menu = self.editor.$pages_menu.find('[data-url="'+self.url+'"]')
     self.pk = self.$page_menu.data('pk');
