@@ -1,11 +1,20 @@
 from django.template.defaulttags import register
 
+
 @register.filter
 def get_item(dictionary, key):
     if dictionary:
         return dictionary.get(key)
     else:
         return None
+
+@register.filter
+def default_container(container):
+    if not container or not len(container):
+        return [{
+            'values': {}
+        }]
+    return container
 
 
 @register.simple_tag(takes_context=True)
@@ -15,3 +24,11 @@ def render_section(context, section, layout=False):
         return section.render(request, layout=layout)
     else:
         return ""
+
+@register.assignment_tag
+def get_root_pages():
+    from ..models import Page
+    sections_pages = Page.objects.select_related('children').filter(is_enabled=True, parent=None)
+    print sections_pages
+    return sections_pages
+

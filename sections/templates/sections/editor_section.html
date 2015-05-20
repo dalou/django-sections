@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% load sections %}
+
+{% block meta_title %}{{ block.super }}{% endblock meta_title %}
+
+
+{% block main %}
+{% render_section section %}
+{% endblock main %}

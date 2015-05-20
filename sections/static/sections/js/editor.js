@@ -1,235 +1,280 @@
-var sections_plugins = []
+// var sections_plugins = []
 
-$(document).ready(function(drop_trigger_count, SECTION_INIT, SECTIONS, SECTION_COUNT, TOSUBMIT) {
+function Editor(self) {
+    self = this;
 
+    self.$pages_menu_url = '/admin/sections/editor/pages/menu/'
+    self.section_url = '/admin/sections/editor/section/'
+    self.page_url = '/admin/sections/editor/page/'
+    self.page_infos_url = '/admin/sections/editor/page/'
+    self.element_url = '/admin/sections/editor/element/'
+    self.element_url = '/admin/sections/editor/element/'
+    self.current_page = null;
 
-    SECTION_COUNT = 0;
-    SECTIONS = [];
-    TOSUBMIT = null;
-    $('#page_form').after($('#section-forms'))
+    self.values = [];
+    self.styles = [];
+    self.tabs = [];
+    self.inputs = [];
 
+    //self.section_editor = new SectionEditor(self)
+}
+Editor.prototype.add_tab = function(name, title) {
+    this.tabs[name] = title;
+}
+Editor.prototype.add_value = function(name, value) {
+    value.name = name;
+    this.values[name] = value;
+}
+Editor.prototype.add_input = function(name, input) {
+    input.name = name;
+    this.inputs[name] = input;
+}
+Editor.prototype.add_style = function(name, style) {
+    style.name = name;
+    this.styles[name] = style;
+}
 
+var PageEditor = new Editor();
 
+Editor.prototype.open_editor = function(self) {
+    self = this;
+    self.close_templates();
+    self.$editor.find('.section-editor').hide();
+    self.$editor.find('.element-editor').hide();
+    self.$editor.stop().animate({ left:0 });
+    self.$page_container.stop().animate({ paddingLeft:310 });
+};
+Editor.prototype.close_editor = function(self) {
+    self = this;
+    self.$editor.find('.section-editor').hide();
+    self.$editor.find('.element-editor').hide();
+    self.$editor.stop().animate({ left:-300 });
+    self.$page_container.stop().animate({ paddingLeft:0 });
+};
 
+Editor.prototype.init = function(data, self) {
+    self = this;
 
-    $('#page_form').submit(function(event, $form, $iframe, error) {
-
-        $('#page_form').addLoading();
-        $('#sections .section').each(function(i, $section) {
-            var $iframe = $(this).find('iframe')
-            $.ajax({
-                url: $('#sections').data('update'),//.update_url,
-                type: 'POST',
-                dataType: 'json',
-                data: [
-                    { name: 'section_title', value: $iframe.data('section-title') },
-                    { name: 'section_order', value: i },
-                    { name: 'section_data', value: JSON.stringify($iframe[0].data) },
-                    { name: 'section_type', value: $iframe.data('section-type') },
-                    { name: 'section_pk', value: $iframe.data('section-pk') }
-                ],
-                async: false,
-                success: function (data) {
-                    console.log('SUCCESS');
-                    //console.log(data);
-                    //$form.replaceWith($(data))
-                    //SECTION_INIT($form)
-                    //$('#page_form').submit();
-                },
-                error: function(data) {
-                    console.log('ERROR');
-                    error = true;
-                    //$form.replaceWith($(data))
-
-                }
-            });
-        });
-        if(error) {
-            return false;
-        }
-        $('#page_form').removeLoading();
-
-    });
-
-
-    SECTION_INIT = function($iframe, $content, $fields) {
-
-        if(!$content[0].section_initialized) {
-            $content[0].section_initialized = true;
-            $iframe.css({
-                width: '100%',
-                border:0,
-            })
-            $iframe[0].data = {}
-
-            $(window).resize(function() {
-                $iframe.height($content.height());
-            });
-            $(window).resize();
-
-            $tooltip = $('<div></div>')
-
-            $remove = $('<a class="pull-right btn btn-danger">Supprimer</a>').click(function() {
-                if(confirm('Supprimer cette section ?')) {
-                    if($iframe.data('remove')) {
-
-                        $.post($iframe.data('remove'), null, function() {
-                            $iframe.parent().remove();
-                        });
-                    }
-                    else {
-                        $iframe.parent().remove();
-                    }
-                }
-            });
-            $up = $('<a class="pull-left btn btn-primary">Monter</a>').click(function() {
-                $iframe.parent().prev().before($iframe.parent());
-                $.smoothScroll({
-                    scrollTarget:  $iframe.prev()
-                })
-            });
-            $down = $('<a class="pull-left btn btn-primary">Descendre</a>').click(function() {
-                $iframe.parent().next().after($iframe.parent());
-                $.smoothScroll({
-                    scrollTarget:  $iframe.prev()
-                })
-
-            });
-            $tooltip.append($up)
-            $tooltip.append($down)
-            $tooltip.append($remove)
-            $iframe.prev().tooltipster({
-                content: $tooltip,
-                interactive: true,
-                position: 'top'
-            })
+    self.$section_action = $('#section-actions')
+    self.$page_container = $('#page-container');
+    self.$page = $('#page');
+    self.$pages_menu = $('#editor-pages-menu');
+    self.$templates = $('#templates')
 
 
-            $fields = $content.find('[data-form]').each(function($field, options) {
-                $field = $(this).css({
-                    cursor:'pointer'
-                });
-                //$field.attr('id', id)
-                options = $(this).data('form')
+    /************** EDITOR ***************/
 
-                if (sections_plugins[options.type]) {
-                    sections_plugins[options.type]($iframe, $field, options)
-
-                }
-                else {
-                    console.log('not found', options.type)
-                }
-                if(options.movable) {
-                    $field.draggable($.extend(options.movable, {
-                        containment: $field.parents('section'),
-                        stop: function(e, item) {
-
-                            $iframe[0].data[options.name+'__x'] = item.offset.left
-                            $iframe[0].data[options.name+'__y'] = item.offset.top
-                            console.log($iframe[0].data)
-                        }
-                    }))
-                }
-                // $field.tooltipster({
-                //     content: $('<h2>Cliquer pour changer</h2>'),
-                //     trigger: 'custom',
-                //     autoClose: false
-                // });
-                $field.append($('<div class="__edit_tooltip__ tooltipspter-default tooltipspter-noir">Double-clic pour editer</div>').css({
-                    position: 'absolute',
-                    left: $field.position().left +5, top:$field.position().top+5,
-                    fontSize: 12, fontWeight: "bold", color:'black', padding: 5, textTransform: 'uppercase', lineHeight: "12px",
-                    background: 'white', boxShadow: 'inset 0px 0px 10px blue', borderRadius: 5
-                }).hide())
-                $field.mouseover(function(e) {
-                    $field.css({
-                        boxShadow: 'inset 0px 0px 10px blue',
-                        //margin: -3
-                    }).find('>.__edit_tooltip__').show()
-                    e.stopPropagation();
-                    return false;
-                }).mouseout(function(e) {
-                    $field.css({
-                        boxShadow: '',
-
-                    }).find('>.__edit_tooltip__').hide()//.tooltipster('show')
-                    e.stopPropagation();
-                    return false;
-                });
-            })
-        }
-    }
-
-    $('#sections .section').each(function($iframe, $content) {
-        $iframe = $(this).find('iframe')
-        $(this).addLoading()
-        $iframe.on('load', function() {
-            SECTION_INIT($iframe, $iframe.contents())
-            $iframe.parent().removeLoading();
-        });
-        $iframe.attr('src', $iframe.data('src'));
-    });
-
-
-    $("#sections-add-modal .add-section").click(function($section, $iframe) {
-
-        $section = $('<div class="section"><h3>Section '+($('#sections .section').length+1)+'</h3></div>');
-
-        $iframe = $('<iframe data-section-type="'+$(this).data('section-type')+'" ></iframe>');
-        $iframe.css({
-            width: '100%',
-            border:0,
-        })
-        $section.append($iframe);
-        $('#sections').append($section);
-        $section.addLoading();
-        $iframe.on('load', function() {
-            SECTION_INIT($iframe, $iframe.contents())
-            $iframe.parent().removeLoading();
-
-        });
-        $iframe.attr('src', $(this).data('src'));
-        $('#sections-add-modal').modal('close');
-
-        // $('#sections').accordion('destroy').accordion({
-        //     collapsible: true,
-        //     heightStyle: "auto",
-        //     active: null,
-        //     header: "> div > h3"
-        // });
-        return false;
-    });
-
-    // $addSection = $('<li class="pull-right"><button>+ Nouvelle Section</button></li>').click(function() {
-    //     $('#sections-add-modal').modal();
-    //     return false;
-
-    // });
-    //$('#suit_form_tabs').append($addSection)
-
-
-    $('#section-add, #section-add-top').click(function() {
-        $('#sections-add-modal').modal();
-        return false;
+    self.$editor = $('#editor')
+    self.$editor.find('>.close').click(function() {
+        self.close_editor();
     })
 
-    $('#sections')/*.accordion({
-        collapsible: true,
-        heightStyle: "content",
-        active: null,
-        header: "> div > h3"
-    }).sortable({
-        axis: "y",
-        handle: "h3",
-        stop: function( event, ui ) {
-          // IE doesn't register the blur when sorting
-          // so trigger focusout handlers to remove .ui-state-focus
-          ui.item.children( "h3" ).triggerHandler( "focusout" );
 
-          // Refresh accordion to handle new order
-          $( this ).accordion( "refresh" );
+    /************** TEMPLATES ***************/
+    self.$templates.on('click', 'a.close', function(e) {
+        self.close_templates();
+    });
+    self.$templates.on('click', 'button.insert', function(e) {
+        self.insert_template($(this).parent().parent());
+
+    });
+    self.$templates.on('click', 'button.thumbnail', function(e) {
+        self.template_screenshot($(this).parent().parent())
+    });
+    self.$templates_menu = $('#editor-templates-menu')
+    self.$templates_menu.on('click', 'a.trigger', function(e) {
+
+        $.fn.addLoadingFull();
+        $.get('/admin/sections/editor/templates/'+$(this).data('pk')+'/', null, function(data) {
+
+            self.$templates.html(data)
+            $.fn.removeLoadingFull();
+            self.open_templates();
+
+            self.$templates.find('.template').each(function() {
+                if($(this).data('need-thumbnail')) {
+                    self.template_screenshot($(this))
+                }
+            })
+        });
+    });
+
+    /************** PAGES ***************/
+    self.$page.load(function() {
+
+        var $page = self.$page.contents();
+        $page.data('page', self.current_page_pk)
+        self.current_page = new Page(self, $page);
+        $.fn.removeLoadingFull();
+    });
+
+    $('#page-container button.page-delete').on('click', function() {
+        self.current_page.remove();
+    })
+
+    self.$pages_menu.find('ul').each(function() {
+        $(this).sortable({
+            items: 'li.editor-page-menu',
+            //handle: "> li a",
+            tolerance: "pointer",
+            containment: 'parent',
+            update: function(event, ui, orders) {
+                orders = []
+                $(ui.item.parent()).find('>li>a.trigger').each(function(i) {
+                    orders.push({
+                        pk: $(this).data('pk'),
+                        order: i
+                    });
+                });
+
+                $.ajax({
+                    method: 'POST',
+                    url: '/admin/sections/editor/pages/reorder/',
+                    data: JSON.stringify(orders),
+                    contentType: 'application/json; charset=utf-8',
+                    headers: {'content-type': 'application/json'},
+                    success: function(data) {
+                    }
+                });
+            }
+        });
+    });
+    self.$pages_menu.on('click', '.editor-pages-add', function(e) {
+        var page_name = prompt('Page name')
+        if(page_name && $.trim(page_name) != "") {
+            self.update_page({
+                name: page_name,
+                parent: $(this).data('parent')
+            })
         }
-      });*/
+        e.stopPropagation();
+        return false;
+    });
+    self.$pages_menu.on('click', 'a.trigger', function(e) {
 
+        $.fn.addLoadingFull();
+        $('#pageTitle').text($(this).data('name'))
+        self.close_editor();
+        self.current_page_pk = $(this).data('pk')
+        self.$page.attr('src', $(this).data('url'))
+
+        // e.stopPropagation();
+        // return true;
+    });
+    self.$pages_menu.find('a.trigger').eq(0).click()
+
+
+    $(window).resize(function() {
+        self.$page.height($(window).height()-123);
+    });
+    $(window).resize();
+};
+
+Editor.prototype.update_page = function(data, reload, self) {
+    self = this
+    $.ajax({
+        method: 'POST',
+        url: '/admin/sections/editor/page/update/',
+        data: JSON.stringify(data),
+        contentType: 'application/json; charset=utf-8',
+        success: function(data) {
+            self.$pages_menu.find('> ul').eq(0).replaceWith(data)
+        }
+    });
+};
+
+
+Editor.prototype.update_section = function(data, reload, self) {
+    self = this
+    $.ajax({
+        method: 'POST',
+        url: '/admin/sections/editor/section/update/',
+        data: JSON.stringify(data),
+        contentType: 'application/json; charset=utf-8',
+        dataType: 'json',
+        headers: {'content-type': 'application/json'},
+        success: function(data) {
+            console.log(data)
+            if(reload) {
+                self.$page.attr('src', self.$page.attr('src') + '?rand='+ (new Date().getTime()))
+            }
+        }
+    });
+};
+
+Editor.prototype.insert_template = function($template, self) {
+    self = this
+    if(self.current_page) {
+        this.update_section({
+            page: self.current_page.pk,
+            template: $template.data('pk'),
+            order: 0,
+            data: {}
+        }, true)
+    }
+};
+Editor.prototype.template_screenshot = function($template, self) {
+    self = this
+
+    $template.addLoading();
+    ifr = $('<iframe></iframe>').css({ width: '1200', position: "fixed", left: -9999, top: -9999 })
+    $('body').append(ifr);
+    ifr.attr('src', '/admin/section/editor/template/screenshot/'+$template.data('pk')+'/')
+        .on('load', function(self) {
+        self = $(this);
+        ifr.height(ifr.contents().height());
+        setTimeout(function() {
+            html2canvas(self.contents().find('html')).then(function(canvas) {
+                dataURL = canvas.toDataURL("image/png");
+                $.post('/admin/section/editor/template/screenshot/'+$template.data('pk')+'/', { base64: dataURL }, function(data) {
+
+                    $template.find('img').attr('src', data);
+                    $template.removeLoading();
+                })
+            });
+        }, 3000);
+    });
+}
+Editor.prototype.open_templates = function(self) {
+    self = this;
+    self.close_editor();
+    self.$templates.stop().animate({ width:300 });
+    self.$page_container.stop().animate({ paddingLeft:310 });
+};
+Editor.prototype.close_templates = function(self) {
+    self = this;
+    self.$templates.stop().animate({ width:0 });
+    self.$page_container.stop().animate({ paddingLeft:0 });
+};
+
+
+$(document).ready(function(editor, DATA, IFRAME, TEMPLATES, SIDEBAR, PAGES, drop_trigger_count, SECTION_INIT, SECTIONS, SECTION_COUNT, TOSUBMIT) {
+
+
+    $(function(){
+        $(document).on("mouseenter",".dropdown-menu > li > a.trigger", function(e){
+            var current=$(this).next();
+            var grandparent=$(this).parent().parent();
+            if($(this).hasClass('left-caret')||$(this).hasClass('right-caret'))
+                $(this).toggleClass('right-caret left-caret');
+            grandparent.find('.left-caret').not(this).toggleClass('right-caret left-caret');
+            grandparent.find(".sub-menu:visible").not(current).hide();
+            current.toggle();
+            e.stopPropagation();
+        });
+        $(document).on("mouseenter",".dropdown-menu > li > a:not(.trigger)", function(){
+            var root=$(this).parents('.dropdown-menu').eq(0);
+            root.find('.left-caret').toggleClass('right-caret left-caret');
+            root.find('.sub-menu:visible').hide();
+        });
+    });
+    $(document).on('click', ".nav-tabs a",  function (e) {
+      e.preventDefault();
+      $(this).tab("show");
+    })
+
+    $.fn.addLoadingFull();
+    PageEditor.init();
+    $.fn.removeLoadingFull();
 
 });

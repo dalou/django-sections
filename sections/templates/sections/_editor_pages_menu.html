@@ -1,0 +1,17 @@
+<ul class="editor-pages-menu dropdown-menu {% if sub %}sub-menu{% endif %}">
+
+    {% for page in pages %}
+    {% with page.get_descendants as children %}
+    <li class="editor-page-menu">
+        <a data-pk="{{ page.pk }}" data-url="{{ page.get_absolute_url }}" data-name="{{ page.full_name }}" class="trigger {% if children %}right-caret{% endif %}" >{{ page.name }}</a>
+        {% include "sections/_editor_pages_menu.html" with pages=children sub=page %}
+    </li>
+    {% endwith %}
+    {% endfor %}
+    <li>
+        <a class="editor-pages-add" {% if sub %}data-parent="{{ page.pk }}"{% endif %}>
+            <span class="fui-plus"></span>
+        </a>
+
+    </li>
+</ul>

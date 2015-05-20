@@ -1,0 +1,171 @@
+<form class="" role="form" id="modeForm" style="height: auto;">
+
+    <input type="hidden" value="{{ options.name }}" name="name">
+    <input type="hidden" value="{{ section.pk }}" name="section">
+
+    <a href="#" class="close"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+
+   <h3><span class="fui-new"></span> Section</h3>
+
+
+    <div class="editor-section-actions">
+        <button type="button" class="up btn btn-inverse htmlBlock"><span class="fui-triangle-up"></span></button>
+        <button type="button" class="down btn btn-inverse htmlBlock"><span class="fui-triangle-down"></span></button>
+        <button type="button" class="btn btn-danger deleteBlock"><span class="fui-trash"></span></button>
+    </div>
+
+    <!-- <ul class="breadcrumb">
+        <li>Editing:</li>
+        <li class="active" id="editingElement">img</li>
+    </ul>
+-->{{ section }}
+{{ options }}
+<hr />
+    {{ section.data }}
+<hr />
+   <h3><span class="fui-new"></span> Element</h3>
+    <ul class="nav nav-tabs" id="section-editor-tabs">
+        {% if options.styles %}
+        <li class="active"><a href="#styles"><span class="fui-new"></span> Style</a></li>
+        {% endif %}
+        {% if options.modes %}
+            {% for mode in options.modes %}
+            <li class=""><a href="#{{ mode }}" id="link_Link"><span class="fui-clip"></span> Content</a></li>
+            {% endfor %}
+        {% endif %}
+    </ul><!-- /tabs -->
+    <div id="section-editor-contents" class="tab-content" >
+
+
+        {% if options.styles %}
+        <div class="tab-pane active" id="styles">
+
+                {% for style in options.styles %}
+
+                    {% if style == 'background-image' %}
+
+
+
+                    {% else %}
+
+                        <div class="form-group clearfix"  id="">
+                            <label for="" class="control-label">{{ style }}:</label>
+                            <input type="text" class="form-control input-sm" id="" placeholder="" name="styles[{{ style }}]">
+                        </div>
+
+                    {% endif %}
+                {% endfor %}
+
+        </div>
+        {% endif %}
+
+        {% if options.modes %}
+
+            {% for mode in options.modes %}
+
+                <input type="hidden" value="{{ mode }}" name="modes[]">
+                {% if options.mode == 'text' %}
+                    <div class="tab-pane link_Tab" id="{{ mode }}">
+
+
+
+
+                            <div class="form-group clearfix"  id="">
+                                <label for="" class="control-label">Texte :</label>
+                                <input type="text" class="form-control input-sm" id="" placeholder="" name="value">
+                            </div>
+
+
+                            <select id="internalLinksDropdown" style="display: none;">
+                                <option value="#">Choose a page</option>
+                                <option value="index.html">index</option>
+                            </select><div class="btn-group select"><button class="btn dropdown-toggle clearfix btn-sm btn-default" data-toggle="dropdown" id="internalLinksDropdown"><span class="filter-option pull-left">Choose a page</span>&nbsp;<span class="caret"></span></button><span class="dropdown-arrow dropdown-arrow-inverse"></span><ul class="dropdown-menu dropdown-inverse" role="menu" style="max-height: 843px; overflow-y: auto; min-height: 0px;"><li rel="0" class="selected"><a tabindex="-1" href="#" class=""><span class="pull-left">Choose a page</span></a></li><li rel="1"><a tabindex="-1" href="#" class=""><span class="pull-left">index</span></a></li></ul></div>
+
+                            <p class="text-center or">
+                                <span>OR</span>
+                            </p>
+
+                            <select id="pageLinksDropdown" style="display: none;">
+                                <option value="#">Choose a block (one page sites)</option>
+                            </select><div class="btn-group select"><button class="btn dropdown-toggle clearfix btn-sm btn-default" data-toggle="dropdown" id="pageLinksDropdown"><span class="filter-option pull-left">Choose a block (one page sites)</span>&nbsp;<span class="caret"></span></button><span class="dropdown-arrow dropdown-arrow-inverse"></span><ul class="dropdown-menu dropdown-inverse" role="menu" style="max-height: 843px; overflow-y: auto; min-height: 0px;"><li rel="0" class="selected"><a tabindex="-1" href="#" class=""><span class="pull-left">Choose a block (one page sites)</span></a></li></ul></div>
+
+                            <p class="text-center or">
+                                <span>OR</span>
+                            </p>
+
+                            <input type="text" class="form-control" id="internalLinksCustom" placeholder="http://somewhere.com/somepage" value="">
+
+
+                    </div>
+
+                {% elif options.mode == 'array' %}
+
+                    Array
+
+                {% elif options.mode == 'image' %}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+        <!-- /tabs -->
+        <div class="tab-pane imageFileTab" id="image_Tab">
+
+            <label>Enter image path:</label>
+
+            <input type="text" class="form-control" id="imageURL" placeholder="Enter an image URL" value="">
+
+            <p class="text-center or">
+                <span>OR</span>
+            </p>
+
+
+                <div class="alert alert-info">
+                  <button class="close fui-cross" data-dismiss="alert"></button>
+                  <h4>Please note</h4>
+                  <p>For security reasons; the file upload has been disabled in the live demo. Normally, you would be able to upload images to be used in your blocks.</p>
+                </div>
+
+
+        </div><!-- /.tab-pane -->
+
+        <!-- /tabs -->
+        <div class="tab-pane videoTab" id="video_Tab">
+
+            <label>Youtube video ID:</label>
+
+            <input type="text" class="form-control margin-bottom-20" id="youtubeID" placeholder="Enter a Youtube video ID" value="">
+
+            <p class="text-center or">
+                <span>OR</span>
+            </p>
+
+            <label>Vimeo video ID:</label>
+
+            <input type="text" class="form-control margin-bottom-20" id="vimeoID" placeholder="Enter a Vimeo video ID" value="">
+
+        </div><!-- /.tab-pane -->
+
+    </div> <!-- /tab-content -->
+
+    <div class="alert alert-success" style="display: none;" id="detailsAppliedMessage">
+        <button class="close fui-cross" type="button" id="detailsAppliedMessageHide"></button>
+        The changes were applied successfully!
+    </div>
+
+    <!-- <div class="margin-bottom-5">
+        <button type="button" class="btn btn-primary btn-embossed btn-sm btn-block" id="saveStyling"><span class="fui-check-inverted"></span> Apply Changes</button>
+    </div> -->
+
+    <!-- <div class="sideButtons clearfix">
+        <button type="button" class="btn btn-inverse btn-embossed btn-xs" id="cloneElementButton"><span class="fui-windows"></span> Clone</button>
+        <button type="button" class="btn btn-warning btn-embossed btn-xs" id="resetStyleButton"><i class="fa fa-refresh"></i> Reset</button>
+        <button type="button" class="btn btn-danger btn-embossed btn-xs" id="removeElementButton"><span class="fui-cross-inverted"></span> Remove</button>
+    </div> -->
+
+    <!--<p class="text-center or">
+        <span>OR</span>
+    </p>
+
+    <button type="button" class="btn btn-default btn-embossed btn-block btn-sm" id="closeStyling"><span class="fui-cross-inverted"></span> Close Editor</button>-->
+
+</form>

@@ -1,6 +1,8 @@
 # encoding: utf-8
 import os
 import requests
+import re
+import json
 
 from django.conf import settings
 from django.db import models
@@ -16,14 +18,12 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.utils import importlib
-from django.template.loader import get_template
-from django.template import TemplateDoesNotExist
 from django.db.models.loading import get_model
-from django.template.loader import render_to_string
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
 from django.core.files.base import ContentFile
+from django.template.loader import get_template, render_to_string, get_template_from_string
 from django.template import Context, RequestContext, Template as DjangoTemplate
-from django.template.loader import get_template_from_string
+
 
 from tinymce.models import HTMLField
 from jsonfield import JSONField
@@ -40,20 +40,31 @@ compiler = Stylus()
 from libs.models.fields import CroppableImageField
 from lxml import etree
 
-SECTIONS = []
-SECTIONS_IMAGES = []
-ABS_SECTIONS_PATH = os.path.join(
-    settings.DJANGO_ROOT,
-    'templates/sections'
-)
-for section in os.listdir(ABS_SECTIONS_PATH):
-    section_path = os.path.join(ABS_SECTIONS_PATH, section)
-    if os.path.isfile(section_path):
-        SECTIONS.append(section.replace('.html', ''))
+# SECTIONS = {}
+# SECTIONS_IMAGES = []
+# ABS_SECTIONS_PATH = os.path.join(
+#     settings.DJANGO_ROOT,
+#     'templates/sections'
+# )
+# for section in os.listdir(ABS_SECTIONS_PATH):
+#     section_path = os.path.join(ABS_SECTIONS_PATH, section)
 
-SECTIONS.sort()
+#     if os.path.isdir(section_path):
+#         section_category = section
+#         SECTIONS[section_category] = []
+#         for section in os.listdir(section_path):
+#             section_path = os.path.join(section_path, section)
+#             if os.path.isfile(section_path):
 
-print SECTIONS
+#                 SECTIONS[section_category].append(section)#.replace('.html', ''))
+
+#     elif os.path.isfile(section_path):
+#         if not SECTIONS.get('Autres'):
+#             SECTIONS['Autres'] = []
+#         SECTIONS['Autres'].append(section)#.replace('.html', ''))
+
+
+# print SECTIONS
 
 class Page(MPTTModel):
 
@@ -128,8 +139,30 @@ class Page(MPTTModel):
 
         super(Page, self).save(*args, **kwargs)
 
-        Page.tree.rebuild()
 
+
+
+    def render(self, request):
+        # tmpl = DjangoTemplate(template)
+        # template = """"""
+        # for section in self.sections.all():
+        #     template += section.source
+
+        t = get_template("sections/page_view.html")
+        # print self.sections.all()
+        context = RequestContext(request, {
+            'sections': self.sections.all(),
+            'page': self,
+        })
+        rendered = t.render(context)
+        return rendered
+
+        # tmpl = DjangoTemplate("sections/page_view.html")
+        # context = RequestContext(request, {
+        #     'sections': self.sections.all(),
+        #     'page': self,
+        # })
+        # html = tmpl.render(context)
 
 
     def get_menu_title(self):
@@ -138,14 +171,63 @@ class Page(MPTTModel):
     @models.permalink
     def get_absolute_url(self):
         if self.type == Page.TYPE_STANDARD:
-            return ('sections:page-view', (), {'slug': self.slug, 'pk': self.pk})
+            return ('sections_page-view', (), {'slug': self.slug, 'pk': self.pk})
+
+    def to_json(self):
+        sections = []
+        for section in self.sections.all():
+            sections.append(section.to_json())
+        return {
+            'pk': self.pk,
+            'name': self.name,
+            'order': self.order,
+            'sections': sections,
+            'pages': [ child.to_json() for child in self.get_descendants() ]
+        }
+
+    @staticmethod
+    def from_json(data, rebuild=True, parent=None):
+        for page_json in data:
+            if  page_json.get('pk'):
+                page = Page.objects.get(pk=page_json.get('pk'))
+            else:
+                page = Page()
+
+            if parent:
+                page.parent = parent
+            elif page_json.get('parent'):
+                page.parent = Page.objects.get(pk=page_json.get('parent'))
+            else:
+                page.parent = None
+
+            page.name = page_json.get('name')
+            page.order = page_json.get('order', 0)
+            page.save()
+
+            Page.from_json(page_json.get('pages', []), rebuild=False, parent=page)
+            Section.from_json(page_json.get('sections', []), page=page)
+
+        if rebuild:
+            Page.tree.rebuild()
+
+
 
 mptt_register(Page,)
 
+
+class TemplateCategory(models.Model):
+
+    name = models.CharField(u"Nom", max_length=255)
+    is_system = models.BooleanField(u"Systeme ?", default=False)
+    is_ghost = models.BooleanField(u"Fantome ?", default=False)
+
 class Template(models.Model):
+
+    category = models.ForeignKey('sections.TemplateCategory', related_name="templates", null=True, blank=True)
 
     name = models.CharField(u"Nom", max_length=255)
     source = models.TextField(u"source", default="Nouvelle section")
+    base64 = models.TextField(u"base64 img", blank=True, null=True)
     image = models.ImageField(_(u"Image"),
                                     upload_to=unique_filename("sections/templates/images/%Y/%m/"),
                                     blank=True, null=True)
@@ -154,6 +236,10 @@ class Template(models.Model):
 
     css = models.TextField(u"css", blank=True, null=True)
     stylus = models.TextField(u"stylus", blank=True, null=True)
+
+    is_system = models.BooleanField(u"Systeme ?", default=False)
+    is_ghost = models.BooleanField(u"Fantome ?", default=False)
+    need_thumbnail = models.BooleanField(u"Thumbnail requit ?", default=True)
 
     def __unicode__(self):              # __unicode__ on Python 2
         return u"%s" % ( self.name )
@@ -169,18 +255,30 @@ class Template(models.Model):
         else:
             source = self.source
         tmpl = DjangoTemplate(source)
+
         context = RequestContext(request, {
             'section': section,
             'page': section.page if section else None,
             'data': section.data if section else None,
         })
         html = tmpl.render(context)
+        if request.user.is_authenticated() and request.user.is_staff:
+            html = re.sub(r'<(\w+)\s+', r"""<\1 name="section-%s" data-section="%s" data-section-order="%s" data-section-page="%s" """ % (
+                # section.pk,
+                # json.dumps(section.data),
+                section.pk if section else None,
+                section.pk if section else None,
+                section.order if section else None,
+                section.page.pk if section else None,
+
+            ), html, count=1)
         return html
 
     def save(self, *args, **kwargs):
         if not self.pk:
             self.order = Template.objects.all().count()
-        self.public_hash = random_token([self.name])
+        if not self.public_hash:
+            self.public_hash = random_token([self.name])
 
         # if self.stylus:
         #     self.css = compiler.compile(self.stylus)
@@ -190,10 +288,10 @@ class Template(models.Model):
 
 
 
-        print "Template"
-        print canonical_url(reverse('sections:template-screenshot', kwargs={'hash': self.public_hash}))
+        # print "Template"
+        # print canonical_url(reverse('sections_template-screenshot', kwargs={'hash': self.public_hash}))
 
-        url=canonical_url(reverse('sections:template-screenshot', kwargs={'hash': self.public_hash}))
+        # url=canonical_url(reverse('sections_template-screenshot', kwargs={'hash': self.public_hash}))
 
         # if not settings.LOCAL_SERVER:
         #     r = requests.post("https://api.cloudconvert.com/convert?\
@@ -234,10 +332,11 @@ class Section(models.Model):
     instance_id = models.PositiveIntegerField(null=True, blank=True)
     instance = GenericForeignKey('instance_type', 'instance_id')
 
-
     order = models.IntegerField(u"Ordre", default=0)
     is_enabled = models.BooleanField(u"Activée", default=True)
     template = models.ForeignKey(u"sections.Template", null=True, blank=True)
+    source = models.TextField(u"source", blank=True, null=True)
+    css = models.TextField(u"css", blank=True, null=True)
 
 
 
@@ -258,6 +357,39 @@ class Section(models.Model):
 
     def get_data(self):
         return self.data
+
+    def to_json(self):
+        return {
+            'pk': self.pk,
+            'template_pk': self.template.pk if self.template else None,
+            'order': self.order,
+            'data': self.data
+        }
+
+    @staticmethod
+    def from_json(data, page=None):
+        for section_json in data:
+            template = section_json.get('template', {})
+            if template:
+                template = Template.objects.get(pk=template.get('pk'))
+
+                if  section_json.get('pk'):
+                    section = Section.objects.get(pk=section_json.get('pk'))
+                else:
+                    section = Section()
+
+                section.template = template
+
+                if page:
+                    section.page = parent
+                elif section_json.get('page'):
+                    section.page = Page.objects.get(pk=section_json.get('page'))
+                else:
+                    section.page = None
+
+                section.data = section_json.get('data', {})
+                section.order = section_json.get('order', 0)
+                section.save()
 
 
     def __str__(self):              # __unicode__ on Python 2

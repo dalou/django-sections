@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <title>NextFlow - Software</title>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="{{ STATIC_URL }}builtin/images/favicon.ico" rel="icon">
+        <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+        <link href="{{ STATIC_URL }}sections/vendors/dropzone.css" rel="stylesheet">
+        <link href="{{ STATIC_URL }}sections/vendors/tooltipster.css" rel="stylesheet">
+        <link href="{{ STATIC_URL }}sections/vendors/flat-ui/css/flat-ui.min.css" rel="stylesheet">
+        <link href="{{ STATIC_URL }}sections/vendors/colpick.css" rel="stylesheet">
+        <link href="{{ STATIC_URL }}sections/css/loading.css" rel="stylesheet">
+        <link href="{{ STATIC_URL }}sections/css/editor.css" rel="stylesheet">
+        <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
+
+
+        <script src="https://code.jquery.com/jquery-1.11.3.js"></script>
+        <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
+        <!--<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>-->
+        <script src="{{ STATIC_URL }}sections/vendors/dropzone.min.js"></script>
+        <script src="{{ STATIC_URL }}sections/vendors/imagesloaded.pkgd.min.js"></script>
+        <script src="{{ STATIC_URL }}sections/vendors/jquery.tooltipster.min.js"></script>
+        <script src="{{ STATIC_URL }}sections/vendors/tinymce/tinymce.min.js"></script>
+        <script src="{{ STATIC_URL }}sections/vendors/jquery.smooth-scroll.min.js"></script>
+        <script src="{{ STATIC_URL }}sections/vendors/colpick.js"></script>
+        <script src="{{ STATIC_URL }}sections/js/loading.js"></script>
+
+        <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
+
+        <script src="{{ STATIC_URL }}sections/js/templates.js"></script>
+        <script src="{{ STATIC_URL }}sections/js/pages.js"></script>
+        <script src="{{ STATIC_URL }}sections/js/sections.js"></script>
+        <script src="{{ STATIC_URL }}sections/js/editor.js"></script>
+
+        <script src="{{ STATIC_URL }}sections/js/plugins/main.js"></script>
+        <script src="{{ STATIC_URL }}sections/vendors/html2canvas.js"></script>
+
+        <script src="{{ STATIC_URL }}sections/vendors/flat-ui/js/vendor/video.js"></script>
+        <script src="{{ STATIC_URL }}sections/vendors/flat-ui/js/flat-ui.min.js"></script>
+
+        <style type="text/css">
+
+
+
+
+        </style>
+
+    </head>
+
+    <body id="home" data-offset="80" data-target=".navbar" data-spy="scroll">
+
+        <nav class="navbar navbar-inverse navbar-embossed" role="navigation">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+              <a class="navbar-brand" href="#">Page editor</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar-collapse-01">
+              <ul class="nav navbar-nav navbar-left">
+
+                <li><a href="#fakelink">Menu Item<span class="navbar-unread">1</span></a></li>
+
+                <li class="dropdown" id="editor-pages-menu">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    <span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Pages <b class="caret"></b>
+                    </a>
+                  <span class="dropdown-arrow"></span>
+                  {% include "sections/_editor_pages_menu.html" with pages=pages %}
+                </li>
+
+
+                <li class="dropdown" id="editor-templates-menu">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    <span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Templates <b class="caret"></b>
+                    </a>
+                  <span class="dropdown-arrow"></span>
+                  <ul class="editor-template-menu dropdown-menu">
+
+                        {% for category in template_categories %}
+                        <li>
+                            <a data-pk="{{ category.pk }}" class="trigger" >{{ category.name }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+
+
+               </ul>
+               <form class="navbar-form navbar-right" action="#" role="search">
+                <div class="form-group">
+                  <div class="input-group">
+                    <input class="form-control" id="navbarInput-01" type="search" placeholder="Search">
+                    <span class="input-group-btn">
+                      <!-- <button type="submit" class="btn"><span class="fui-search"></span></button> -->
+
+                    </span>
+                  </div>
+                </div>
+                <!-- <a href="#" id="editor_save" class="btn btn-primary btn-embossed pull-right actionButtons"><span class="fui-check"></span> <span class="bLabel">Save changes (!)</span></a> -->
+              </form>
+            </div><!-- /.navbar-collapse -->
+          </nav>
+
+          <div id="templates">
+
+
+            <ul class="nav nav-tabs" id="section-editor-tabs">
+
+            </ul>
+            <div id="section-editor-contents" class="tab-content" >
+            </div> -->
+        </div>
+
+        <div id="editor">
+
+
+
+        </div>
+        <div id="page-infos">
+
+        </div>
+
+
+
+        <!-- <div id="menu" class="clearfix affix-top">
+
+        </div> -->
+        <div id="sidebar">
+            <div class="menu">
+
+                <div class="second">
+                    <h3></h3>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-container">
+            <div class="page-inner">
+                <div class="toolbar">
+
+                    <div class="buttons clearfix">
+                        <span class="left red"></span>
+                        <span class="left yellow"></span>
+                        <span class="left green"></span>
+                    </div>
+                    <div class="buttons clearfix" style="float:right; position:relative; top:-12px; right:-1px;">
+                        <button type="button" class="page-delete btn btn-xs btn-danger"><span class="fui-trash"></span></button>
+                    </div>
+
+                    <div class="title" id="pageTitle">
+                        <span><span>index</span>.html</span>
+                    </div>
+
+                </div>
+                <iframe id="page" src=""></iframe>
+
+                <div id="section-actions">
+                    <button type="button" class="up btn btn-inverse htmlBlock"><span class="fui-triangle-up"></span></button>
+                    <button type="button" class="down btn btn-inverse htmlBlock"><span class="fui-triangle-down"></span></button>
+                    <button type="button" class="btn btn-danger deleteBlock"><span class="fui-trash"></span></button>
+                </div>
+            </div>
+        </div>
+
+
+
+    </body>
+</html>

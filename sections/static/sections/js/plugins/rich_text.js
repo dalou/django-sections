@@ -20,17 +20,7 @@ sections_plugins['rich_text'] = function($iframe, $field, options) {
         })
 
         $modal.modal('show');
-        tinymce.init({
-            selector: '#'+id,
 
-            plugins: [
-                "advlist autolink lists link image charmap print preview anchor",
-                "searchreplace visualblocks code fullscreen textcolor",
-                "insertdatetime media table contextmenu paste"
-            ],
-            toolbar: "insertfile undo redo | styleselect | bold italic | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image"
-
-        });
         return false;
 
 

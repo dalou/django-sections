@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% load thumbnail sections %}
+
+{% block meta_title %}{{ block.super }}{% endblock meta_title %}
+
+
+{% block main %}
+
+{% for section in sections %}
+    {% render_section section %}
+{% endfor %}
+{% endblock %}

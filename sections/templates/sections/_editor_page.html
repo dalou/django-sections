@@ -7,11 +7,9 @@
 
 {% block main %}
 
+{% for section in sections %}
+    <iframe src="{% url "section_editor_page_section" section.pk %}">
 
-{% for section in page.sections.all %}
-
-    {% render_section section %}
-
-
+    </iframe>
 {% endfor %}
 {% endblock %}

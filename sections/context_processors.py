@@ -8,7 +8,7 @@ from sections.models import Page
 
 def page(request):
 
-    main_pages = Page.objects.select_related('children').filter(is_enabled=True, parent=None)
+    sections_pages = Page.objects.select_related('children').filter(is_enabled=True, parent=None)
     return {
-        'main_pages': main_pages,
+        'sections_pages': sections_pages,
     }
