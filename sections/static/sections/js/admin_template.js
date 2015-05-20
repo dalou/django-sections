@@ -1,22 +1,24 @@
 function screenshot(src, ifr) {
 
-    ifr = $('<iframe></iframe>').css({ width: '1200', zIndex: 1, position: "fixed", left: -9999, top: -9999 })
+    ifr = $('<iframe></iframe>').css({ width: '1200', zIndex: 1, position: "fixed", left: 0, top: 0 })
     $('body').append(ifr);
     ifr.attr('src', src)
         .on('load', function(self) {
         self = $(this);
         ifr.height(ifr.contents().height());
-        ifr.contents().find('html').css('background-image', 'url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7) !important')
+        ifr.contents().find('html,body').css('background', 'transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP4Xw8AAoABf5/NhYYAAAAASUVORK5CYII=) repeat !important')
         setTimeout(function() {
             html2canvas(ifr.contents().find('html')).then(function(canvas) {
                 dataURL = canvas.toDataURL("image/png");
-                $('#id_base64').val(dataURL)
+                $('#id_base64').val(dataURL).next().attr('src', dataURL);
+                ifr.remove();
+
             });
-        }, 3000);
+        }, 5000);
     });
 }
 
-$(document).ready(function(UPDATE, QUERY_TO) {
+$(document).ready(function(UPDATE, QUERY_TO, editor) {
   if($('#id_source').length) {
     $('#id_source').hide().before(
      $('<div id="id_source_editor"></div>').text($('#id_source').val())
@@ -24,6 +26,7 @@ $(document).ready(function(UPDATE, QUERY_TO) {
       $('<iframe  style="border:0px; width:100%;" id="id_source_preview"></iframe>')
     )
     $('#id_base64').hide();
+    $('#id_base64').after('<img />')
     QUERY_TO = null;
     UPDATE = function() {
       $('#id_source').val(editor.getValue());
@@ -32,7 +35,8 @@ $(document).ready(function(UPDATE, QUERY_TO) {
           $('#id_source_preview').attr('src', '/section/template/preview/').on('load', function(self) {
             ifr = $(this)
             ifr.height(ifr.contents().height());
-            ifr.contents().find('html,body').css('background-image', 'url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7) !important')
+            ifr.contents().find('html,body').css('background', 'transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP4Xw8AAoABf5/NhYYAAAAASUVORK5CYII=) repeat !important')
+            console.log(ifr.contents().find('html,body').css('background'))
             ifr.contents().click(function() {
                 ifr.height(ifr.contents().height());
 
@@ -52,7 +56,7 @@ $(document).ready(function(UPDATE, QUERY_TO) {
       })
 
     }
-    var editor = ace.edit("id_source_editor");
+    editor = ace.edit("id_source_editor");
     editor.setTheme("ace/theme/monokai");
     editor.getSession().setMode("ace/mode/twig");
     editor.setOptions({
