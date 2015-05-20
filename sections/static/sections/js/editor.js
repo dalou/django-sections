@@ -222,8 +222,8 @@ Editor.prototype.template_screenshot = function($template, ifr, self) {
 Editor.prototype.open_templates = function(self) {
     self = this;
     self.close_editor();
-    self.$templates.stop().animate({ width:300 });
-    self.$page_container.stop().animate({ paddingLeft:310 });
+    self.$templates.stop().animate({ width:400 });
+    self.$page_container.stop().animate({ paddingLeft:410 });
 };
 Editor.prototype.close_templates = function(self) {
     self = this;

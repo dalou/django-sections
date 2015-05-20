@@ -43,18 +43,11 @@ class TemplateAdmin(admin.ModelAdmin):
             'https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/mode-html.js',
             'https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/mode-twig.js',
             'https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/mode-stylus.js',
-            settings.STATIC_URL + 'sections/js/templates.js',
-            'js/select2.js',
-            'vendors/jquery.datetimepicker.js',
+            settings.STATIC_URL + 'sections/js/admin_template.js',
             'sections/vendors/html2canvas.js',
-            settings.STATIC_URL + 'vendors/jquery.smooth-scroll.min.js',
-            settings.STATIC_URL + 'vendors/jquery.form.js',
         ]
         css = {
             'all': (
-                # settings.STATIC_URL + 'vendors/cropper.css',
-                settings.STATIC_URL + 'vendors/jquery.datetimepicker.css',
-                'css/select2.css'
             )
         }
 
