@@ -196,11 +196,11 @@ Editor.prototype.insert_template = function($template, self) {
         new Section(self.current_page, $template.data('pk') );
     }
 };
-Editor.prototype.template_screenshot = function($template, self) {
+Editor.prototype.template_screenshot = function($template, ifr, self) {
     self = this
 
     $template.addLoading();
-    ifr = $('<iframe></iframe>').css({ width: '1200', height: '100%', zIndex: 1, position: "fixed", left: -9999, top: -9999 })
+    ifr = $('<iframe></iframe>').css({ width: '1200', zIndex: 1, position: "fixed", left: -9999, top: -9999 })
     $('body').append(ifr);
     ifr.attr('src', '/admin/section/editor/template/screenshot/'+$template.data('pk')+'/')
         .on('load', function(self) {
@@ -213,6 +213,7 @@ Editor.prototype.template_screenshot = function($template, self) {
 
                     $template.find('img').attr('src', data);
                     $template.removeLoading();
+                    ifr.remove()
                 })
             });
         }, 5000);
