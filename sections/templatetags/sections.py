@@ -9,11 +9,14 @@ def get_item(dictionary, key):
         return None
 
 @register.filter
-def default_container(container):
+def default_container(container, count=1):
     if not container or not len(container):
-        return [{
-            'values': {}
-        }]
+        defaults = []
+        for i in range(count):
+            defaults.append({
+                'values': {}
+            })
+        return defaults
     return container
 
 
