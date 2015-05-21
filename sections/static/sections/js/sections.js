@@ -21,6 +21,7 @@ Section.prototype.load = function($section, self) {
     self.pk = $section.data('section');
     self.order = $section.data('section-order');
     self.data = {}
+    self.selected_element = null;
 
     self.$editor = $('<div class="section-editor">\
         <a href="#" class="close"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>\
@@ -30,10 +31,14 @@ Section.prototype.load = function($section, self) {
             <button type="button" class="down btn btn-inverse"><span class="fui-triangle-down"></span></button>\
             <button type="button" class="target btn btn-primary"><span class="fui-eye"></span></button>\
             <button type="button" class="delete btn btn-danger"><span class="fui-trash"></span></button>\
-        </div><hr />\
+        </div>\
+        <hr />\
     </div>').hide();
 
-    self.editor.$editor.append(self.$editor)
+    self.editor.$editor.append(self.$editor);
+
+
+    //self.$editor.find('iframe').attr('src', '/admin/sections/editor/section/preview/'+self.pk+'/')
 
     self.$editor.on('click', '.editor-section-actions button.up', function(e) {
         self.$section.prev('[data-section]').before(self.$section);

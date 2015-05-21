@@ -1,22 +1,22 @@
-function screenshot(src, ifr) {
+// function screenshot(src, ifr) {
 
-    ifr = $('<iframe></iframe>').css({ width: '1200', zIndex: -1, position: "fixed", left: 0, top: 0 })
-    $('body').append(ifr);
-    ifr.attr('src', src)
-        .on('load', function(self) {
-        self = $(this);
-        ifr.height(ifr.contents().height());
-        ifr.contents().find('html,body').css('background', 'transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP4Xw8AAoABf5/NhYYAAAAASUVORK5CYII=) repeat !important')
-        setTimeout(function() {
-            html2canvas(ifr.contents().find('html,body')).then(function(canvas) {
-                dataURL = canvas.toDataURL("image/png");
-                $('#id_base64').val(dataURL).next().attr('src', dataURL);
-                ifr.remove();
+//     ifr = $('<iframe></iframe>').css({ width: '1200', zIndex: -1, position: "fixed", left: 0, top: 0 })
+//     $('body').append(ifr);
+//     ifr.attr('src', src)
+//         .on('load', function(self) {
+//         self = $(this);
+//         ifr.height(ifr.contents().height());
+//         ifr.contents().find('html,body').css('background', 'transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP4Xw8AAoABf5/NhYYAAAAASUVORK5CYII=) repeat !important')
+//         setTimeout(function() {
+//             html2canvas(ifr.contents().find('html,body')).then(function(canvas) {
+//                 dataURL = canvas.toDataURL("image/png");
+//                 $('#id_base64').val(dataURL).next().attr('src', dataURL);
+//                 ifr.remove();
 
-            });
-        }, 5000);
-    });
-}
+//             });
+//         }, 5000);
+//     });
+// }
 
 $(document).ready(function(UPDATE, QUERY_TO, editor) {
   if($('#id_source').length) {
@@ -34,14 +34,16 @@ $(document).ready(function(UPDATE, QUERY_TO, editor) {
       $.post('/section/template/preview/', { source: editor.getValue()}, function(ifr) {
           $('#id_source_preview').attr('src', '/section/template/preview/').on('load', function(self) {
             ifr = $(this)
+            ifr.height('auto');
             ifr.height(ifr.contents().height());
             ifr.contents().find('html,body').css('background', 'transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP4Xw8AAoABf5/NhYYAAAAASUVORK5CYII=) repeat !important')
             console.log(ifr.contents().find('html,body').css('background'))
             ifr.contents().click(function() {
+                ifr.height('auto');
                 ifr.height(ifr.contents().height());
 
             })
-            screenshot('/section/template/preview/')
+            //screenshot('/section/template/preview/')
 
             // setTimeout(function() {
             //    html2canvas(self.contents().find('html')).then(function(canvas) {

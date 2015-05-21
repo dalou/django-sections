@@ -39,7 +39,7 @@ def get_root_pages():
 def render_style(element):
     if isinstance(element, dict):
         styles = element.get('styles', {})
-        return "".join([ ("%s:%s;" % (key,value)) for key,value in element.get('styles', {}).items() ])
+        return "".join([ ("%s:%s !important;" % (key,value)) for key,value in element.get('styles', {}).items() ])
     return ""
 
 

@@ -81,6 +81,27 @@ class EditorPagesMenuView(generic.ListView):
     def get(self, request, *args, **kwargs):
         return super(EditorPagesMenuView, self).get(request, *args, **kwargs)
 
+# TEMPLATES
+@login_required
+@csrf_exempt
+def editor_template_categories(request):
+    categories = TemplateCategory.objects.exclude(is_ghost=True)
+    return JsonResponse([{
+        'pk': category.pk,
+        'name': category.name
+    } for category in categories], safe=False)
+
+
+@login_required
+@csrf_exempt
+def editor_templates(request, pk):
+    category = TemplateCategory.objects.get(pk=pk)
+    return JsonResponse([{
+        'pk': template.pk,
+        'name': template.name,
+        'image': template.image.url if template.image else None,
+    } for template in category.templates.all()], safe=False)
+
 # PAGES
 
 @require_POST
@@ -194,6 +215,13 @@ def editor_section_update(request):
     #     # "options": data.get('options', {})
     # })
 
+@login_required
+@csrf_exempt
+def editor_section_preview(request, pk):
+    section = Section.objects.get(pk=pk)
+    return HttpResponse(section.render(request, layout=True))
+
+
 @require_POST
 @login_required
 @csrf_exempt
@@ -250,32 +278,31 @@ class EditorPageView(generic.DetailView):
 
 
 
-@login_required
 @csrf_exempt
-def template_screenshot(request, pk):
+def template_screenshot(request, hash):
 
-    if request.method == "POST":
-        tmpl = Template.objects.get(pk=pk)
-        import base64
-        from django.core.files.uploadedfile import SimpleUploadedFile
-        tmpl.base64 = None#request.POST.get('base64',tmpl.base64 )
-        tmpl.image.delete()
-        img_base64 = request.POST.get('base64').replace("data:image/png;base64,", "")
-        png_recovered = base64.decodestring(img_base64)
-        tmpl.image = SimpleUploadedFile('uploaded_file.png', png_recovered, content_type='image/png')
-        tmpl.need_thumbnail = False
-        tmpl.save()
-        return HttpResponse(tmpl.image.url)
+    # if request.method == "POST":
+    #     tmpl = Template.objects.get(pk=pk)
+    #     import base64
+    #     from django.core.files.uploadedfile import SimpleUploadedFile
+    #     tmpl.base64 = None#request.POST.get('base64',tmpl.base64 )
+    #     tmpl.image.delete()
+    #     img_base64 = request.POST.get('base64').replace("data:image/png;base64,", "")
+    #     png_recovered = base64.decodestring(img_base64)
+    #     tmpl.image = SimpleUploadedFile('uploaded_file.png', png_recovered, content_type='image/png')
+    #     tmpl.need_thumbnail = False
+    #     tmpl.save()
+    #     return HttpResponse(tmpl.image.url)
 
-    elif request.method == "GET":
-        tmpl = Template.objects.get(pk=pk)
-        try:
-            html = tmpl.render(request, layout=bool(int(request.GET.get('layout', True ))))
-        except:
-            html = 'error'
-        return HttpResponse(
-            html
-        )
+    # elif request.method == "GET":
+    tmpl = Template.objects.get(public_hash=hash)
+    try:
+        html = tmpl.render(request, layout=bool(int(request.GET.get('layout', True ))))
+    except:
+        html = 'error'
+    return HttpResponse(
+        html
+    )
 
 
 

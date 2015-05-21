@@ -8,7 +8,7 @@ setup(
     platforms=['OS Independent'],
     description="Sections content managment",
     setup_requires = [
-
+        'Ghost.py'
     ],
     install_requires = [
     ],

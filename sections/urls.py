@@ -32,11 +32,14 @@ urlpatterns = patterns('sections.views',
     url(r'^admin/sections/editor/page/remove/(?P<pk>[\d]+)/$', login_required(views.editor_page_remove), name="sections_editor_page_remove"),
     url(r'^admin/sections/editor/page/update/$', login_required(views.editor_page_update), name="sections_editor_page_update"),
 
-    url(r'^admin/sections/editor/templates/(?P<pk>[\d]+)/$', login_required(views.EditorTemplatesView.as_view()), name="sections_editor_templates"),
+    url(r'^admin/sections/editor/templates/categories/$', login_required(views.editor_template_categories), name="sections_editor_template_categories"),
+    url(r'^admin/sections/editor/templates/(?P<pk>[\d]+)/$', login_required(views.editor_templates), name="sections_editor_templates"),
 
     url(r'^admin/sections/editor/sections/reorder/$', login_required(views.editor_sections_reorder), name="sections_editor_sections_reorder"),
     url(r'^admin/sections/editor/section/update/$', login_required(views.editor_section_update), name="sections_editor_section_update"),
     url(r'^admin/sections/editor/section/remove/(?P<pk>[\d]+)/$', login_required(views.editor_section_remove), name="sections_editor_section_remove"),
+    url(r'^admin/sections/editor/section/preview/(?P<pk>[\d]+)/$', login_required(views.editor_section_preview), name="sections_editor_section_preview"),
+
 
     url(r'^admin/sections/editor/upload/image/$', login_required(views.editor_upload_image), name="sections_editor_upload_image"),
 
@@ -47,7 +50,7 @@ urlpatterns = patterns('sections.views',
     # url(r'^admin/sections/editor/section/(?P<pk>[\d]+)/$', views.EditorSectionView.as_view(), name="sections_editor_section"),
     url(r'^admin/sections/editor/page/(?P<pk>[\d]+)/$', login_required(views.EditorPageView.as_view()), name="sections_editor_page"),
 
-    url(r'^admin/section/editor/template/screenshot/(?P<pk>[\d]+)/$', login_required(views.template_screenshot), name="sections_editor_template_screenshot"),
+    url(r'^admin/sections/editor/template/screenshot/(?P<hash>\w{10,64})/$', views.template_screenshot, name="sections_editor_template_screenshot"),
 
 
     url(r'^admin/sections/update/$', views.update, name="sections_update"),

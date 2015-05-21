@@ -1,5 +1,77 @@
 // var sections_plugins = []
 
+function TemplateCategory(editor, data, self) {
+    self = this;
+    self.editor = editor;
+    self.pk = data.pk;
+    self.name = data.name;
+    self.templates = []
+    self.$menuItem = $('<li>\
+        <a data-pk="'+self.pk+'" class="trigger">'+self.name+'</a>\
+    </li>');
+    self.$menuItem.on('click', 'a.trigger', function(e) {
+
+        $.fn.addLoadingFull();
+        self.editor.$templates.empty().html('\
+            <a href="#" class="close">\
+                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>\
+            </a>\
+            <h3><span class="fui-list"></span> Templates</h3>\
+            <ul></ul>')
+        self.templates = [];
+        $.get('/admin/sections/editor/templates/'+self.pk+'/', null, function(data) {
+
+            for(var i in data) {
+                self.templates.push(new Template(self, data[i]));
+            }
+            self.editor.open_templates();
+            $.fn.removeLoadingFull();
+        });
+    });
+    self.$menuItem.appendTo(self.editor.$templates_menu.find('.editor-template-menu'))
+}
+
+function Template(category, data, self) {
+    self = this;
+    self.category = category;
+    self.editor = category.editor;
+    self.pk = data.pk;
+    self.name = data.name;
+    self.$template = $('\
+        <li class="template" data-pk="'+self.pk+'" >\
+            <img src="'+data.image+'" alt="{{ template.name }}">\
+            <div class="editor-template-actions">\
+                <button type="button" class="insert btn btn-danger btn-sm"><span class="fui-plus"></span></button>\
+            </div>\
+        </li>');
+    self.$template.appendTo(self.editor.$templates.find('ul'))
+}
+
+Template.prototype.edit = function(self) {
+    self = this;
+    self.editor.$editor.empty();
+    self.editor.$editor.html('\
+        <div class="element-editor"><h3><span class="fui-new"></span>Template editor</h3>\
+            <ul class="nav nav-tabs">\
+                <li class="active">\
+                    <a href="#editor-tab-1"><span class="fui-new"></span> Code</a>\
+                </li>\
+                <li class="">\
+                    <a href="#editor-tab-2"><span class="fui-new"></span> Preview</a>\
+                </li>\
+                <li class="">\
+                    <a href="#editor-tab-3"><span class="fui-new"></span> Screenshot</a>\
+                </li>\
+            </ul>\
+            <div class="tab-content" id="#editor-tab-1"></div>\
+            <div class="tab-content" id="#editor-tab-2"></div>\
+            <div class="tab-content" id="#editor-tab-3"></div>\
+        </div>');
+
+    self.editor.open_editor('90%')
+}
+
+
 function Editor(self) {
     self = this;
 
@@ -61,6 +133,7 @@ Editor.prototype.init = function(data, self) {
     self.$pages_menu = $('#editor-pages-menu');
     self.$templates = $('#templates')
 
+    self.load_templates();
 
     /************** EDITOR ***************/
 
@@ -82,22 +155,7 @@ Editor.prototype.init = function(data, self) {
         self.template_screenshot($(this).parent().parent())
     });
     self.$templates_menu = $('#editor-templates-menu')
-    self.$templates_menu.on('click', 'a.trigger', function(e) {
 
-        $.fn.addLoadingFull();
-        $.get('/admin/sections/editor/templates/'+$(this).data('pk')+'/', null, function(data) {
-
-            self.$templates.html(data)
-            $.fn.removeLoadingFull();
-            self.open_templates();
-
-            self.$templates.find('.template').each(function() {
-                if($(this).data('need-thumbnail')) {
-                    self.template_screenshot($(this))
-                }
-            })
-        });
-    });
 
     /************** PAGES ***************/
     self.$page.load(function() {
@@ -175,6 +233,17 @@ Editor.prototype.init = function(data, self) {
     });
     $(window).resize();
 };
+
+
+Editor.prototype.load_templates = function(self) {
+    self = this;
+    $.get('/admin/sections/editor/templates/categories/', null, function(data) {
+        for(var i in data) {
+            new TemplateCategory(self, data[i]);
+        }
+    })
+
+}
 
 Editor.prototype.update_page = function(data, reload, self) {
     self = this

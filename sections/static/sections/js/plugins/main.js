@@ -75,7 +75,7 @@ PageEditor.add_input('tinymce', {
             },
             menubar: false,
             toolbar_items_size: 'small',
-            toolbar: "insertfile undo redo | styleselect | bold italic | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image"
+            toolbar: "insertfile undo redo | styleselect | bold italic | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | code"
         });
     }
 });

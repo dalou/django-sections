@@ -232,7 +232,7 @@ class Template(models.Model):
 
     name = models.CharField(u"Nom", max_length=255)
     source = models.TextField(u"source", default="Nouvelle section")
-    base64 = models.TextField(u"base64 img", blank=True, null=True)
+    # base64 = models.TextField(u"base64 img", blank=True, null=True)
     image = models.ImageField(_(u"Image"),
                                     upload_to=unique_filename("sections/templates/images/%Y/%m/"),
                                     blank=True, null=True)
@@ -285,19 +285,29 @@ class Template(models.Model):
         if not self.public_hash:
             self.public_hash = random_token([self.name])
 
-        if not self.image and self.base64:
+        # if not self.image and self.base64:
 
-            base64 = self.base64.replace("data:image/png;base64,", "")
+        #     base64 = self.base64.replace("data:image/png;base64,", "")
 
-            png_recovered = base64_original.decodestring(base64)
-            self.image = SimpleUploadedFile('uploaded_file.png', png_recovered, content_type='image/png')
-            self.base64 = None
+        #     png_recovered = base64_original.decodestring(base64)
+        #     self.image = SimpleUploadedFile('uploaded_file.png', png_recovered, content_type='image/png')
+        #     self.base64 = None
+
 
         # if self.stylus:
         #     self.css = compiler.compile(self.stylus)
 
         super(Template, self).save(*args, **kwargs)
 
+        # from ghost import Ghost
+        # ghost = Ghost()
+        # url = canonical_url(reverse("sections_editor_template_screenshot", kwargs={ 'hash': self.public_hash }))
+        # print url
+        # page, extra_resources = ghost.open(url)
+        # page, resources = ghost.wait_for_page_loaded()
+        # print page
+
+        # print ghost.capture_to('/tmp/header.png', selector="body")
 
 
 
