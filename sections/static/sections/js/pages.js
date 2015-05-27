@@ -32,7 +32,7 @@ function Page(data, self) {
 
     self.$menuItem = $('\
         <li class="editor-page-menu">\
-            <a class="trigger '+(data.pages && data.pages.length ? 'right-caret' : '') +'" >'+self.name+'</a>\
+            <a data-pk="'+self.pk+'" class="trigger '+(data.pages && data.pages.length ? 'right-caret' : '') +'" >'+self.name+'</a>\
             <ul class="editor-pages-menu dropdown-menu sub-menu">\
                 <li class="pages-add">\
                     <a class="">\
