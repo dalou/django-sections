@@ -281,6 +281,11 @@ class Template(models.Model):
             source = self.source
         tmpl = DjangoTemplate(source)
 
+        import pprint
+        print section
+        #if section.title.strip().lower() == "4x1_images_left_right":
+        pprint.pprint(section.data)
+
         context = RequestContext(request, {
             'section': section,
             'page': section.page if section else None,

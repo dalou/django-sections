@@ -257,8 +257,8 @@ def editor_section_create(request):
 def editor_section_update(request):
 
     data = json.loads(request.body)
-    if data.get('section'):
-        section = Section.objects.select_related('page', 'template').get(pk=data.get('section'))
+    if data.get('pk'):
+        section = Section.objects.select_related('page', 'template').get(pk=data.get('pk'))
     else:
         section = Section()
 
@@ -277,7 +277,10 @@ def editor_section_update(request):
     if data.get('data'):
         section.data = data.get('data')
 
+
     section.save()
+    import pprint
+    pprint.pprint(section.data)
     return JsonResponse(section.to_json(), safe=False)
 
     # return render_to_response("sections/_editor_section.html", {
