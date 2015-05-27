@@ -39,7 +39,7 @@ def get_root_pages():
 def render_style(element):
     if isinstance(element, dict):
         styles = element.get('styles', {})
-        return "".join([ ("%s:%s !important;" % (key,value)) for key,value in element.get('styles', {}).items() ])
+        return "".join([ ("%s:%s;" % (key,value)) for key,value in element.get('styles', {}).items() ])
     return ""
 
 
@@ -54,8 +54,9 @@ def render_element(name, values, styles, data):
     if isinstance(styles, basestring):
         element['styles'] = styles
 
-    output = """data-element='%s' """ % (
-        json.dumps(element)
+    output = """data-element='%s' data-element-name="%s" """ % (
+        json.dumps(element),
+        name
     )
     if data:
         output += """style="%s" """ % (

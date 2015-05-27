@@ -176,14 +176,15 @@ class Page(MPTTModel):
             return ('sections_page-view', (), {'slug': self.slug, 'pk': self.pk})
 
     def to_json(self):
-        sections = []
-        for section in self.sections.all():
-            sections.append(section.to_json())
+        # sections = []
+        # for section in self.sections.all():
+            # sections.append(section.to_json())
         return {
             'pk': self.pk,
             'name': self.name,
             'order': self.order,
-            'sections': sections,
+            'url': self.get_absolute_url(),
+            # 'sections': sections,
             'pages': [ child.to_json() for child in self.get_descendants() ]
         }
 
@@ -226,6 +227,15 @@ class TemplateCategory(models.Model):
     def __unicode__(self):
         return u"%s" % ( self.name )
 
+
+    def to_json(self):
+        return {
+            'pk': self.pk,
+            'name': self.name,
+            #'order': self.order,
+            'templates': [ template.to_json() for template in self.templates.all() ]
+        }
+
 class Template(models.Model):
 
     category = models.ForeignKey('sections.TemplateCategory', related_name="templates", null=True, blank=True)
@@ -248,6 +258,16 @@ class Template(models.Model):
 
     def __unicode__(self):              # __unicode__ on Python 2
         return u"%s" % ( self.name )
+
+
+    def to_json(self):
+        return {
+            'pk': self.pk,
+            'name': self.name,
+            'source': self.source,
+            'image': self.image.url if self.image else None,
+            'css': self.css
+        }
 
     def render(self, request, section=None, layout=True):
         if layout:

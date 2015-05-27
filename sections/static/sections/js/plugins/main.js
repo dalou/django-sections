@@ -63,6 +63,9 @@ PageEditor.add_input('tinymce', {
         return $field;
     },
     init: function(elm, opt, change) {
+
+                console.log('INIT', '#'+elm.$field.find('textarea').attr('id'))
+
         var tmce = tinymce.init({
             selector: '#'+elm.$field.find('textarea').attr('id'),
             plugins: [
@@ -118,7 +121,7 @@ PageEditor.add_input('color', {
                 elm.$elm.css(opt.name, '#'+hex)
                 // Fill the text box just if the color was set using the picker, and not the colpickSetColor function.
                 if(!bySetColor) $(el).val('#'+hex);
-                change('#'+hex);
+                //change('#'+hex);
             }
         }).keyup(function(){
             $(this).colpickSetColor(this.value);
@@ -192,7 +195,7 @@ PageEditor.add_style('background-size', { input: 'choice', label: 'Background ty
 PageEditor.add_style('background-image', {
     input: 'image', label: 'Background image',
     set_value: function(elm, opt) {
-        elm.$elm.css('background-image', 'url('+elm.value+')')
+        elm.$elm.css('background-image', 'url("'+elm.value+'")')
         return 'url('+elm.value+')';
     }}
 )

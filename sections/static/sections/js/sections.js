@@ -1,107 +1,71 @@
 
 
-function Section(page, $section_or_template, self) {
+function Section(data, self) {
     self = this;
 
-    self.page = page;
-    self.editor = page.editor;
-    if(!$section_or_template.context) {
-        self.create($section_or_template)
-    }
-    else {
-        self.load($section_or_template)
-    }
-}
-
-Section.prototype.load = function($section, self) {
-    self = this;
-    self.$section = $section;
-    self.$section[0].section = self;
+    self.page = data.page;
+    self.template = data.template;
+    self.$section = data.$section;
+    self.pk = self.$section ? self.$section.data('section') : null;
+    self.order = self.$section ? self.$section.data('section-order') : 0;
+    self.editor = self.page.editor;
     self.elements = {};
-    self.pk = $section.data('section');
-    self.order = $section.data('section-order');
+
+    self.$selected_element = null;
     self.data = {}
-    self.selected_element = null;
 
-    self.$editor = $('<div class="section-editor">\
-        <a href="#" class="close"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>\
-        <h3><span class="fui-new"></span> Section <span>'+self.order+'</span></h3>\
-        <div class="editor-section-actions">\
-            <button type="button" class="up btn btn-inverse"><span class="fui-triangle-up"></span></button>\
-            <button type="button" class="down btn btn-inverse"><span class="fui-triangle-down"></span></button>\
-            <button type="button" class="target btn btn-primary"><span class="fui-eye"></span></button>\
-            <button type="button" class="delete btn btn-danger"><span class="fui-trash"></span></button>\
-        </div>\
-        <hr />\
-    </div>').hide();
+    self.page.sections.push(self)
 
-    self.editor.$editor.append(self.$editor);
+    if(self.$section) {
+        self.$section[0].section = self;
 
-
-    //self.$editor.find('iframe').attr('src', '/admin/sections/editor/section/preview/'+self.pk+'/')
-
-    self.$editor.on('click', '.editor-section-actions button.up', function(e) {
-        self.$section.prev('[data-section]').before(self.$section);
-        self.page.reorder_sections();
-        self.target();
-    });
-    self.$editor.on('click', '.editor-section-actions button.down', function(e) {
-        self.$section.next('[data-section]').after(self.$section);
-        self.page.reorder_sections();
-        self.target();
-    });
-    self.$editor.on('click', '.editor-section-actions button.delete', function(e) {
-        if(confirm('Delete this section ?')) {
-            self.remove();
-        }
-    });
-    self.$editor.on('click', '.editor-section-actions button.target', function(e) {
-        self.target();
-    });
-
-    self.$editor.on('click', 'a.close', function(e) {
-        self.close_editor();
-    });
-
-
-
-    self.$section.on('click', function(e) {
-        self.open_editor();
-    });
-
-    self.$section.on('mouseenter', function(e) {
-        $section.css({
-            border: '3px red dashed'
-        })
-    });
-    self.$section.on('mouseleave', function(e) {
-        $section.css({
-            border: ''
+        self.$section.on('mouseenter', function(e) {
+            $(this).css({
+                border: '3px red dashed'
+            })
         });
-    });
-    self.$section.on('mouseenter', '[data-element]', function(e) {
-        $(this).css({
-            outline: 'red dashed 3px',
-            cursor: 'pointer'
-        })
-        e.stopPropagation();
-        return false;
-    });
-    self.$section.on('mouseleave', '[data-element]', function(e) {
-        $(this).css({
-            outline: '',
-            cursor: ''
-        })
-        e.stopPropagation();
-        return false;
-    });
+        self.$section.on('mouseleave', function(e) {
+            $(this).css({
+                border: ''
+            });
+        });
 
-    if(self.$section.data('element')) {
-        new Element(self, self.$section);
+        self.$section.on('click', function(e)
+        {
+            self.editor.open_editor(self.get_editor());
+        });
+        self.$section.on('click', 'a', function(e)
+        {
+            self.propagate = true;
+            return true;
+        });
+
+        if(self.$section.data('element')) {
+            new Element({
+                section: self,
+                $element: self.$section
+            });
+        }
+        self.$section.find('[data-element]').each(function() {
+            new Element({
+                section: self,
+                $element: $(this)
+            });
+        });
     }
-    self.$section.find('[data-element]').each(function(e) {
-        new Element(self, $(this));
-    });
+
+    // self.$section.find('[data-element]').addBack('[data-element]').on('click', function(e)
+    // {
+    //     console.log('ELEMENT CLICK')
+    //     self.editor.open_editor(self.get_element_editor($(this)));
+
+    //     if(!self.propagate) {
+    //         e.stopPropagation();
+    //     }
+    //     self.propagate = false;
+    //     e.preventDefault();
+    //     e.stopPropagation();
+    // });
 
 
     // self.$section.on('click', '[data-element]', function(e) {
@@ -112,46 +76,34 @@ Section.prototype.load = function($section, self) {
     //     return false;
     // });
 }
-Section.prototype.create = function(template, callback, self) {
-    self = this;
-    var data = {
-        page: self.page.pk,
-        template: template,
-        data: {}
-    }
-    $.ajax({
-        method: 'POST',
-        url: '/admin/sections/editor/section/update/',
-        data: JSON.stringify(data),
-        contentType: 'application/json; charset=utf-8',
-        dataType: 'json',
-        headers: {'content-type': 'application/json'},
-        success: function(data) {
-            console.log(data)
-            self.page.reload(function(page) {
-                console.log('RELOAD', page)
-            });
-        }
-    });
-}
+
+
+
 Section.prototype.update = function(callback, self) {
     self = this;
-    var data = {
-        section: self.pk,
+    var data = self.pk ? {
+        pk: self.pk,
+        page: self.page.pk,
         data: self.to_data()
+    } : {
+        page: self.page.pk,
+        template: self.template,
+        data: {}
     }
      console.log('SECTION BEFORE UPDATE', data)
     $.ajax({
         method: 'POST',
-        url: '/admin/sections/editor/section/update/',
+        url: '/admin/sections/editor/section/'+(self.pk ? 'update' : 'create')+'/',
         data: JSON.stringify(data),
         contentType: 'application/json; charset=utf-8',
         dataType: 'json',
         headers: {'content-type': 'application/json'},
         success: function(data) {
             console.log('SECTION UPDATED', data)
-            if(callback) {
-                self.page.reload(callback)
+            if(!self.pk) {
+                self.page.reload(function(page) {
+                    page.sections[page.sections.length-1].target()
+                })
             }
         }
     });
@@ -159,61 +111,110 @@ Section.prototype.update = function(callback, self) {
 }
 Section.prototype.target = function(self) {
     self = this;
-    $.smoothScroll({
-        scrollTarget: self.$section
-    });
+    // $.smoothScroll({
+    //     scrollTarget: self.$section
+    // });
     self.$section.parents('html,body').animate({scrollTop: self.$section.offset().top},'slow');
 }
 Section.prototype.remove = function(self) {
     self = this
-    $.ajax({
-        method: 'POST',
-        url: '/admin/sections/editor/section/remove/'+self.pk+'/',
-        success: function(data) {
-            var index = self.page.sections.indexOf(self)
-            if (index > -1) {
-                self.$section.remove();
-                self.$editor.remove();
-                self.page.sections.splice(index, 1);
+    if(confirm('Delete this section ?')) {
+        self.editor.postJSON(
+            '/admin/sections/editor/section/remove/',
+            { pk: self.pk },
+            function(data) {
+                var index = self.page.sections.indexOf(self)
+                if (index > -1) {
+                    self.$section.remove();
+                    self.page.sections.splice(index, 1);
+                }
             }
-        }
-    });
+        );
+    }
 }
 
-Section.prototype.open_editor = function(self) {
-    self = this;
-    self.editor.open_editor();
-    self.$editor.show();
-};
 
-Section.prototype.close_editor = function(self) {
-    self = this;
-    self.editor.close_editor();
-};
 
-Section.prototype.to_data = function(reload, data, self) {
+Section.prototype.to_data = function(reload, data, data_by_key, self) {
     self = this;
     data = {}
     for(var i in self.elements) {
-
-        var element = self.elements[i];
-        var name = element.name;
-        data[name] = element.to_data();
-
-        // if(name) {
-
-        //     if(element.container) {
-        //         if(!data[element.container].container) {
-        //             data[element.container].container = []
-        //         }
-        //         data[element.container].container.push(element.data)
-        //     }
-        //     else {
-        //         data[name] = element.data
-        //     }
-        // }
-
+        data[self.elements[i].name] = self.elements[i].to_data()
     }
+    // self.$section.find('[data-element]').addBack('[data-element]').each(function(e) {
+
+    //     var options = $(this).data('element')
+    //     var keys = options.name.split('.');
+    //     var name = keys.pop();
+
+    //     var element = {
+    //         styles: {}, values: {}
+    //     }
+    //     var types = ['styles', 'values']
+    //     for(var i in types) {
+    //         var type = types[i];
+    //         if(options[type]) {
+    //             var names = options[type].split(',')
+    //             for(var i in names)  {
+    //                 var value = self.get_element_value($(this), names[i], type);
+    //                 if(value && $.trim(value != "")) {
+    //                     element[type][names[i]] = value;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     var container = data;
+    //     if(keys.length > 1) {
+    //         for(var i in keys) {
+    //             var key = keys[i];
+    //             container = container[key]
+    //             if(! container.container ) {
+    //                 container.container = [];
+    //             }
+    //             container = container.container
+    //         }
+    //         container.push(element);
+    //     }
+    //     else {
+    //         container[name] = element;
+    //     }
+    // });
     return data;
 
 }
+Section.prototype.move_up = function(self) {
+    self = this;
+    self.$section.prev('[data-section]').before(self.$section);
+    self.page.reorder_sections(kwargs);
+    self.target();
+}
+Section.prototype.move_down = function(kwargs, self) {
+    self = this;
+    self.$section.next('[data-section]').after(self.$section);
+    kwargs.section = self
+    self.page.reorder_sections(kwargs);
+    self.target();
+}
+
+Section.prototype.get_editor = function(template, callback, self) {
+    self = this;
+
+    var $editor = $('\
+        <div class="editor-element">\
+            <h3 class="pull-left"><span class="fui-new"></span> Section : <span>'+self.order+'</span></h3>\
+            <div class="editor-section-actions pull-right">\
+                <button type="button" class="up btn btn-xs btn-inverse"><span class="fui-triangle-up"></span></button>\
+                <button type="button" class="down btn btn-xs btn-inverse"><span class="fui-triangle-down"></span></button>\
+                <button type="button" class="target btn btn-xs btn-primary"><span class="fui-eye"></span></button>\
+                <button type="button" class="delete btn btn-xs btn-danger"><span class="fui-trash"></span></button>\
+            </div>\
+            <div class="clearfix"></div>\
+        </div>')
+        .on('click', '.editor-section-actions button.up', function() { self.move_up({ $editor: $editor }); })
+        .on('click', '.editor-section-actions button.down', function() { self.move_down({ $editor: $editor }); })
+        .on('click', '.editor-section-actions button.delete', function() { self.remove({ $editor: $editor }); })
+        .on('click', '.editor-section-actions button.target', function() { self.target({ $editor: $editor }); })
+    $editor.prepend(self.page.get_editor())
+    return $editor;
+}
+

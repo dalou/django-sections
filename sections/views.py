@@ -81,28 +81,81 @@ class EditorPagesMenuView(generic.ListView):
     def get(self, request, *args, **kwargs):
         return super(EditorPagesMenuView, self).get(request, *args, **kwargs)
 
+
+
+
+
+
+
 # TEMPLATES
 @login_required
 @csrf_exempt
-def editor_template_categories(request):
+def editor_templates(request):
     categories = TemplateCategory.objects.exclude(is_ghost=True)
-    return JsonResponse([{
-        'pk': category.pk,
-        'name': category.name
-    } for category in categories], safe=False)
+    return JsonResponse([category.to_json() for category in categories], safe=False)
 
+@require_POST
+@login_required
+@csrf_exempt
+def editor_template_create(request):
+    data = json.loads(request.body)
+    category = TemplateCategory.objects.get(pk=data.get('category'))
+    template = Template()
+    template.category = category
+    template.source = data.get('source', 'Nouveau template')
+    template.css = data.get('css', '')
+    template.name = data.get('name', 'Nouveau template')
+    template.save()
+    return JsonResponse(template.to_json(), safe=False)
+
+@require_POST
+@login_required
+@csrf_exempt
+def editor_template_update(request):
+    data = json.loads(request.body)
+    template = Template.objects.get(pk=data.get('pk'))
+    template.source = data.get('source', template.source)
+    template.css = data.get('css', template.css)
+    template.name = data.get('name', template.name)
+    template.save()
+    return JsonResponse(template.to_json())
+
+@require_POST
+@login_required
+@csrf_exempt
+def editor_template_remove(request, pk):
+    data = json.loads(request.body)
+    template = Template.objects.get(pk=data.get('pk'))
+    template.delete()
+    return JsonResponse({})
 
 @login_required
 @csrf_exempt
-def editor_templates(request, pk):
-    category = TemplateCategory.objects.get(pk=pk)
-    return JsonResponse([{
-        'pk': template.pk,
-        'name': template.name,
-        'image': template.image.url if template.image else None,
-    } for template in category.templates.all()], safe=False)
+def editor_template_preview(request):
+
+    if request.method == "POST":
+        data = json.loads(request.body)
+        template = Template(source=data.get('source'))
+        try:
+            html = template.render(request, layout=bool(int(data.get('layout', True ))))
+        except Exception, e:
+            html = 'Error : %s', e.message
+        request.session['section_editor_template_preview'] = html
+        return HttpResponse(reverse('sections_editor_template_preview'))
+
+    elif request.method == "GET":
+        return HttpResponse(request.session.get('section_editor_template_preview', 'Empty'))
+
+
+
+
+
 
 # PAGES
+@login_required
+@csrf_exempt
+def editor_pages(request):
+    return JsonResponse([page.to_json() for page in Page.objects.filter(parent=None)], safe=False)
 
 @require_POST
 @login_required
@@ -115,28 +168,34 @@ def editor_upload_image(request):
         'image': section_image.image.url
     })
 
+@require_POST
+@login_required
+@csrf_exempt
+def editor_page_create(request):
+    data = json.loads(request.body)
+    page = Page()
+    if data.get('parent'):
+        parent = Page.objects.get(pk=data.get('parent'))
+        page.parent = parent
+        page.order = page.parent.children.count()
+    else:
+        page.order = Page.objects.filter(parent=None).count()
+    page.name = data.get('name', 'Nouvelle page')
+    page.save()
+    return JsonResponse(page.to_json(), safe=False)
 
 @require_POST
 @login_required
 @csrf_exempt
 def editor_page_update(request):
-
     data = json.loads(request.body)
-    if data.get('page'):
-        page = Page.objects.get(pk=data.get('page'))
-    else:
-        page = Page()
+    page = Page.objects.get(pk=data.get('page'))
     if data.get('parent'):
         parent = Page.objects.get(pk=data.get('parent'))
         page.parent = parent
-
-    if data.get('name'):
-        page.name = data.get('name')
+    page.name = data.get('name', page.name)
     page.save()
-    return render_to_response("sections/_editor_pages_menu.html", {
-        "last_page": page,
-        "pages": Page.objects.select_related('sections').filter(parent=None),
-    })
+    return JsonResponse(page.to_json(), safe=False)
 
 
 @require_POST
@@ -163,10 +222,12 @@ def editor_pages_reorder(request):
 @require_POST
 @login_required
 @csrf_exempt
-def editor_page_remove(request, pk):
-    page = Page.objects.get(pk=pk)
+def editor_page_remove(request):
+
+    data = json.loads(request.body)
+    page = Page.objects.get(pk=data.get('pk'))
     page.delete()
-    return HttpResponse('')
+    return JsonResponse({}, safe=False)
 
 
 
@@ -175,6 +236,20 @@ def editor_page_remove(request, pk):
 
 
 # SECTIONS
+@require_POST
+@login_required
+@csrf_exempt
+def editor_section_create(request):
+    data = json.loads(request.body)
+    page = Page.objects.get(pk=data.get('page'))
+    template = Template.objects.get(pk=data.get('template'))
+    section = Section()
+    section.page = page
+    section.data = {}
+    section.template = template
+    section.order = section.page.sections.count()
+    section.save()
+    return JsonResponse(section.to_json(), safe=False)
 
 @require_POST
 @login_required
@@ -203,12 +278,7 @@ def editor_section_update(request):
         section.data = data.get('data')
 
     section.save()
-    return JsonResponse({
-        'section': section.pk,
-        'page': section.page.pk,
-        'template': section.template.pk,
-        'data': data.get('data')
-    }, safe=False)
+    return JsonResponse(section.to_json(), safe=False)
 
     # return render_to_response("sections/_editor_section.html", {
     #     "section": section,
@@ -245,8 +315,9 @@ class EditorSectionView(generic.DetailView):
 @require_POST
 @login_required
 @csrf_exempt
-def editor_section_remove(request, pk):
-    section = Section.objects.get(pk=pk)
+def editor_section_remove(request):
+    data = json.loads(request.body)
+    section = Section.objects.get(pk=data.get('pk'))
     section.delete()
     return HttpResponse('')
 
