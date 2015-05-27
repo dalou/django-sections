@@ -396,7 +396,10 @@ class Section(models.Model):
         verbose_name = u"Section"
 
     def render(self, request, layout=False):
-        return self.template.render(request, section=self, layout=layout)
+        if self.template:
+            return self.template.render(request, section=self, layout=layout)
+        else:
+            return ''
 
     def get_data(self):
         return self.data
