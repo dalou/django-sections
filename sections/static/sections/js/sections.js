@@ -184,8 +184,8 @@ Section.prototype.to_data = function(reload, data, data_by_key, self) {
 }
 Section.prototype.move_up = function(kwargs, self) {
     self = this;
-    kwargs = {}
     self.$section.prev('[data-section]').before(self.$section);
+    kwargs.section = self
     self.page.reorder_sections(kwargs);
     self.target();
 }
