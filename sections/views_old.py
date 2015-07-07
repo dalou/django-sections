@@ -30,37 +30,18 @@ from django.template import Context, RequestContext, Template as DjangoTemplate
 
 
 
-from sections.models import Page, Section, Template, TemplateCategory, SectionImage
+from sections.models import Version, Page, Section, Template, TemplateCategory, SectionImage
 
 logger = logging.getLogger(__name__)
 
+def get_current_version():
+    version = Version.objects.filter(active=True).first()
+    if not version:
+        version = Version.objects.last()
+    return version
 
 
-class PageView(generic.DetailView):
-    template_name = "sections/page_view.html"
-    context_object_name = "page"
-    model = Page
 
-    def get(self, request, *args, **kwargs):
-
-        return super(PageView, self).get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        ctx = super(PageView, self).get_context_data(**kwargs)
-
-        return ctx
-
-class EditorView(generic.TemplateView):
-    template_name = "sections/page_editor.html"
-
-    def get(self, request, *args, **kwargs):
-        return super(EditorView, self).get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        ctx = super(EditorView, self).get_context_data(**kwargs)
-        ctx['pages'] = Page.objects.select_related('sections').filter(parent=None)
-        ctx['template_categories'] = TemplateCategory.objects.exclude(is_ghost=True)
-        return ctx
 
 class EditorTemplatesView(generic.ListView):
     template_name = "sections/_editor_templates.html"
@@ -91,8 +72,37 @@ class EditorPagesMenuView(generic.ListView):
 @login_required
 @csrf_exempt
 def editor_templates(request):
-    categories = TemplateCategory.objects.exclude(is_ghost=True)
+    categories = TemplateCategory.objects.exclude(is_ghost=True, version=get_current_version())
     return JsonResponse([category.to_json() for category in categories], safe=False)
+
+@require_POST
+@login_required
+@csrf_exempt
+def editor_template_category_create(request):
+    data = json.loads(request.body)
+    category = TemplateCategory()
+    category.name = data.get('name', 'Nouveau template')
+    category.save()
+    return JsonResponse(category.to_json(), safe=False)
+
+@require_POST
+@login_required
+@csrf_exempt
+def editor_template_category_update(request):
+    data = json.loads(request.body)
+    category = TemplateCategory.objects.get(pk=data.get('pk'))
+    category.name = data.get('name', template.name)
+    category.save()
+    return JsonResponse(category.to_json())
+
+@require_POST
+@login_required
+@csrf_exempt
+def editor_template_category_remove(request, pk):
+    data = json.loads(request.body)
+    category = TemplateCategory.objects.get(pk=data.get('pk'))
+    category.delete()
+    return JsonResponse({})
 
 @require_POST
 @login_required
@@ -129,24 +139,6 @@ def editor_template_remove(request, pk):
     template.delete()
     return JsonResponse({})
 
-@login_required
-@csrf_exempt
-def editor_template_preview(request):
-
-    if request.method == "POST":
-        data = json.loads(request.body)
-        template = Template(source=data.get('source'))
-        try:
-            html = template.render(request, layout=bool(int(data.get('layout', True ))))
-        except Exception, e:
-            html = 'Error : %s', e.message
-        request.session['section_editor_template_preview'] = html
-        return HttpResponse(reverse('sections_editor_template_preview'))
-
-    elif request.method == "GET":
-        return HttpResponse(request.session.get('section_editor_template_preview', 'Empty'))
-
-
 
 
 
@@ -155,7 +147,7 @@ def editor_template_preview(request):
 @login_required
 @csrf_exempt
 def editor_pages(request):
-    return JsonResponse([page.to_json() for page in Page.objects.filter(parent=None)], safe=False)
+    return JsonResponse([page.to_json() for page in Page.objects.filter(parent=None, version=get_current_version())], safe=False)
 
 @require_POST
 @login_required

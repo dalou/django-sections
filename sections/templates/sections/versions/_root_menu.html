@@ -1,0 +1,21 @@
+<li class="dropdown" id="version-menu">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="version_root">
+        <span class="glyphicon glyphicon-list-alttt" aria-hidden="true"></span> v{{ current_version.number }} <b class="caret"></b>
+    </a>
+    <span class="dropdown-arrow"></span>
+    <ul class="editor-versions-menu dropdown-menu">
+
+        {% for version in versions %}
+        <li class="editor-version-menu" data-json="{{ page.to_json }}" >
+            <a  class="trigger {% if children %}right-caret{% endif %}" >Version {{ version.number }}</a>
+
+        </li>
+        {% endfor %}
+
+        <li class="version-add">
+            <a>
+                <span class="fui-plus"></span>
+            </a>
+        </li>
+    </ul>
+</li>

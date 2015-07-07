@@ -1,0 +1,59 @@
+<form class="sections-modal template-save-form" method="POST"
+
+    {% if not form.instance.pk %}
+        action="{% url 'sections_editor_template_create' category=category.pk  %}"
+    {% else %}
+        action="{% url 'sections_editor_template_update' pk=form.instance.pk  %}"
+    {% endif %}
+    >
+    <div class="sections-modal-head">
+        <span class="fui-new"></span>Template editor
+    </div>
+    <div class="sections-modal-content">
+
+        {% csrf_token %}
+        {{ form.errors }}
+        <div  class="form">
+            <ul class="nav nav-tabs">
+                <li class="active">
+                    <a href="#editor-template-tab-1"><span class="fui-new"></span> Source</a>
+                </li>
+                <li class="">
+                    <a href="#editor-template-tab-2" class="preview-trigger"><span class="fui-new"></span> Preview</a>
+                </li>
+                <li class="">
+                    <a href="#editor-template-tab-3"><span class="fui-new"></span> CSS</a>
+                </li>
+                <li class="">
+                    <a href="#editor-template-tab-4"><span class="fui-new"></span> Image</a>
+                </li>
+            </ul>
+            <div class="tab-content active" id="editor-template-tab-1">
+                {#% include "sections/forms/field.html" with field=form.source %#}
+
+                {{ form.source }}
+            </div>
+            <div class="tab-content preview-tab" id="editor-template-tab-2">
+                <iframe></iframe>
+            </div>
+            <div class="tab-content" id="editor-template-tab-3">
+
+            </div>
+            <div class="tab-content" id="editor-template-tab-4">
+                <div class="image-base64" style="height:500px; border:3px dashed grey">
+
+                </div>
+
+                <div class="hidden">
+                    {{ form.image_base64_crop }}
+                    {{ form.image_base64 }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="sections-modal-foot">
+        <button type="submit" class="app btn btn-primary pull-right">
+            Save <span class="fui-save"></span>
+        </a>
+    </div>
+</form>

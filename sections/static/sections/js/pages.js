@@ -1,79 +1,189 @@
+$(document).ready(function(editor, $pageFrame, $pageMenu) {
 
+    editor = PageEditor;
+    $pageFrame = $('#page');
+    $pageMenu = $('#pages-menu');
+
+    /* MENU MANAGER */
+    $(document).on('click', '.page-menu a.trigger', function(e) {
+
+        console.log('OPEN PAGE', $(this).parent().data())
+        var data = $(this).parent().data()
+        editor.current_page = data
+        document.location.hash = data.url
+        $('#page-root-menu').html(data.name+ '  <b class="caret"></b>').parent().removeClass('open');
+        $('#page-settings-menu').html( $(this).parent().find('>.hidden').html() )
+        $pageFrame.attr('src', data.url)
+        editor.close_editor();
+        e.stopPropagation();
+    });
+
+    /* ONLOAD PAGE */
+    $pageFrame.load(function() {
+        var url = $pageFrame.contents().get(0).location.pathname;
+        var $current_page = $('editor-page-menu[data-url="'+url+'"]')
+        if($current_page.length) {
+            editor.current_page = $current_page.data();
+            //self.pages[url].load();
+        }
+        else {
+            editor.current_page = null;
+        }
+    });
+
+
+    /* REORDER PAGES */
+    $pageMenu.find('ul').each(function() {
+        $(this).sortable({
+            items: '>li.editor-page-menu',
+            //handle: "> li a",
+            tolerance: "pointer",
+            containment: 'parent',
+            update: function(event, ui, orders) {
+                orders = []
+                $(ui.item.parent()).find('>li>a.trigger').each(function(i) {
+                    orders.push({
+                        pk: $(this).data('pk'),
+                        order: i
+                    });
+                });
+                editor.postJSON('/admin/sections/editor/pages/reorder', orders, function(data) { })
+            }
+        });
+    })
+
+    /* ADD PAGE */
+    $pageMenu.on('click', '>.pages-add', function(e) {
+        var page_name = prompt('Page name')
+        if(page_name && $.trim(page_name) != "") {
+
+            editor.postJSON('/admin/sections/editor/page/create', {
+                name: page_name,
+                parent: $(this).data('parent')
+            }, function(data) {
+                console.log(data)
+            });
+        }
+        e.stopPropagation();
+        return false;
+    });
+
+
+});
+
+
+
+function pages_init(editor, self) {
+    self = editor;
+
+
+
+
+
+
+    $.get('/admin/sections/editor/pages/', null, function(data) {
+
+        root_page = new Page({
+            pages: data,
+            editor: self
+        }, true)
+        // for(var i in data) {
+        //     var page_data = data[i];
+        //     page_data.editor = self
+        //     new Page(page_data);
+        // }
+
+        var hash = document.location.hash;
+        console.log(hash)
+        if(!hash) {
+            root_page.pages[data[0].url].open();
+        }
+        else {
+            var page = root_page.pages[hash.split('#')[1]]
+            if(page) {
+                page.open();
+            }
+            else {
+
+            }
+
+        }
+
+        // self.$pagesMenu.on('click', '>.pages-add', function(e) {
+        //     page_create(self)
+        //     e.stopPropagation();
+        //     return false;
+        // });
+    });
+}
 function page_create(editor, parent) {
 
-    var page_name = prompt('Page name')
-    if(page_name && $.trim(page_name) != "") {
-        var page = new Page({ editor: editor, name: page_name, parent: parent });
-        page.update();
-    }
+
 }
 
 
 function page_reorder(pages) {
-    page.$menuItem
+
 }
 
 
-function Page(data, self) {
-    self = this
-
-    self.editor = data.editor;
+function Page(data, root, self) {
+    self = this;
     self.parent = data.parent;
-    self.pk = data.pk;
-    self.name = data.name;
-    self.url = data.url;
+    self.editor = data.editor;
     self.sections = [];
     self.pages = [];
+    self.url = data.url;
     self.$selected_section = $.noop();
+    self.root = root;
 
-    //self.url = self.$page_iframe.contents().get(0).location.pathname
-    //self.$page_menu = self.editor.$pages_menu.find('[data-url="'+self.url+'"]')
+    self.init(data);
+    if(self.root) {
+        self.$menuItem = self.editor.$pagesMenu
+    }
+    else {
+        self.$menuItem = $('\
+            <li class="'+(self.root ? 'dropdown' : '') +'">\
+                <a data-pk="'+self.pk+'" class="trigger \
+                    '+(!self.root && data.pages && data.pages.length ? 'right-caret' : '') +'" >\
+                    '+self.name+'\
+                </a>\
+                '+(self.root ? '<span class="dropdown-arrow"></span>' : '') +'\
+                <ul class="dropdown-menu '+(self.root ? '' : 'sub-menu') +'">\
+                    <li class="pages-add">\
+                        <a class="">\
+                            <span class="fui-plus"></span>\
+                        </a>\
+                    </li>\
+                </ul>\
+            </li>')
+        self.$settingsMenuItem = $('\
+            <li class="editor-page-settings-menu">\
+                <a data-pk="'+self.pk+'" class="trigger">s</a>\
+            </li>')
+        self.$menuItem.on('click', 'a.trigger', function(e) {
+            self.open();
+            self.editor.close_editor();
+            $('#page_root').parent().removeClass('open')
+            e.stopPropagation();
+        })
 
+        self.editor.pages[self.url] = self;
+        if(self.parent) {
+            self.parent.$menuItem.find('>ul').append(self.$menuItem);
+            self.parent.$menuItem.find('>ul>li').eq(-1).after(self.parent.$menuItem.find('>ul>li.pages-add'));
+            self.parent.pages.push(self);
+        }
+        else {
+            self.editor.$pagesMenu.append(self.$menuItem);
+            self.editor.$pagesMenu.find('>ul>li').eq(-1).after(self.editor.$pagesMenu.find('>li.pages-add'));
+        }
+    }
 
-    self.$menuItem = $('\
-        <li class="editor-page-menu">\
-            <a data-pk="'+self.pk+'" class="trigger '+(data.pages && data.pages.length ? 'right-caret' : '') +'" >'+self.name+'</a>\
-            <ul class="editor-pages-menu dropdown-menu sub-menu">\
-                <li class="pages-add">\
-                    <a class="">\
-                        <span class="fui-plus"></span>\
-                    </a>\
-                </li>\
-            </ul>\
-        </li>')
-
-    self.$menuItem.on('click', 'a.trigger', function(e) {
-        self.open();
-        self.editor.close_editor();
-        $('#page_root').parent().removeClass('open')
-        e.stopPropagation();
-    })
     self.$menuItem.on('click', '> ul > li.pages-add a', function(e) {
         page_create(self.editor, self);
         e.stopPropagation();
     })
-
-    //$('#pageTitle').text(self.$page_menu.data('name') + ' (id: '+self.pk+')')
-
-    // self.$page.find('[data-section]').each(function() {
-
-    //     self.sections.push(new Section(self, $(this)));
-
-    // });
-    // self.$page.click(function() {
-    //     $('nav .dropdown').removeClass('open');
-    // });
-
-    self.editor.pages[data.url] = self;
-    if(self.parent) {
-        self.parent.$menuItem.find('>ul').append(self.$menuItem);
-        self.parent.$menuItem.find('>ul>li').eq(-1).after(self.parent.$menuItem.find('>ul>li.pages-add'));
-        self.parent.pages.push(self);
-    }
-    else {
-        self.editor.$pagesMenu.append(self.$menuItem);
-        self.editor.$pagesMenu.find('>li').eq(-1).after(self.editor.$pagesMenu.find('>li.pages-add'));
-    }
 
     if(data.pages) {
         for(var i in data.pages) {
@@ -83,11 +193,43 @@ function Page(data, self) {
             var page = new Page(page_data);
         }
     }
+}
+
+Page.prototype.init = function(data, self) {
+    self = this;
+    self.pk = data.pk;
+    self.name = data.name;
+    self.url = data.url;
 };
 Page.prototype.open = function(callback, self) {
     self = this;
     self.loadMenu();
     self.editor.$page.attr('src', self.url)
+}
+
+Page.prototype.load = function(callback, self) {
+    self = this;
+    self.sections = [];
+    self.loadMenu();
+    self.$page = self.editor.$page.contents();
+    self.$page.find('[data-section]').each(function() {
+
+        new Section({ page: self, $section: $(this) });
+
+    });
+    if(self.load_callback) {
+        self.load_callback(self);
+        self.load_callback = null;
+    }
+    // self.$page.sortable({
+    //     items: '[data-section]',
+    //     dropOnEmpty: false,
+    //     //revert: true,
+    //     iframeFix: true,
+    //     placeholder: "ui-state-highlight"
+
+    // }).disableSelection();
+    // self.$page.trigger('sortreceive');
 }
 Page.prototype.update = function(callback, self) {
     self = this
@@ -102,9 +244,7 @@ Page.prototype.update = function(callback, self) {
         data: JSON.stringify(data),
         contentType: 'application/json; charset=utf-8',
         success: function(data) {
-            self.name = data.name;
-            self.pk = data.pk;
-            self.url = data.url;
+            self.init(data);
             self.reload();
         }
     });
@@ -157,30 +297,6 @@ Page.prototype.insert_section = function(kwargs, self) {
     //     items: '.isotope'
     // })
     self.editor.open_editor(kwargs.$editor, 200)
-}
-Page.prototype.load = function(callback, self) {
-    self = this;
-    self.sections = [];
-    self.loadMenu();
-    self.$page = self.editor.$page.contents();
-    self.$page.find('[data-section]').each(function() {
-
-        new Section({ page: self, $section: $(this) });
-
-    });
-    if(self.load_callback) {
-        self.load_callback(self);
-        self.load_callback = null;
-    }
-    // self.$page.sortable({
-    //     items: '[data-section]',
-    //     dropOnEmpty: false,
-    //     //revert: true,
-    //     iframeFix: true,
-    //     placeholder: "ui-state-highlight"
-
-    // }).disableSelection();
-    // self.$page.trigger('sortreceive');
 }
 Page.prototype.reorder_sections = function(kwargs, self) {
     self = this;

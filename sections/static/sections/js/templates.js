@@ -1,32 +1,212 @@
 
+$(document).ready(function(CREATE_INIT, CROP_INIT) {
+
+    CROP_INIT = function($form, src, crop) {
+
+        src = $('#id_image_base64').val()
+        crop = $('#id_image_base64_crop').val()
+        $form.find('.image-base64').empty().append(
+            $('<img />').attr('src', src).css({
+                width: "100%"
+            }).cropper({
+              // aspectRatio: 16 / 9,
+              autoCropArea: 0.65,
+              strict: false,
+              guides: false,
+              highlight: false,
+              dragCrop: false,
+              cropBoxMovable: false,
+              cropBoxResizable: false
+            })
+        )
+    }
+
+    CREATE_INIT = function($form, source_editor, handlePaste) {
+        console.log($form)
+        textarea = $form.find("#id_source")
+        source_editor = ace.edit("id_source");
+        source_editor.setTheme("ace/theme/monokai");
+        source_editor.getSession().setMode("ace/mode/twig");
+        source_editor.setOptions({
+          maxLines: Infinity
+        });
+        source_editor.resize();
+        source_editor.on("change", function(e) {
+
+            textarea.val(source_editor.getValue());
+        });
+        textarea.val(source_editor.getValue());
+        // kwargs.$editor.on('click', '.nav .save', function() {
+        //     self.source = kwargs.source_editor.getValue();
+        //     self.update();
+        // })
+
+        CROP_INIT($form)
+
+        $form.on('click', '.preview-trigger', function() {
+            $form.find('.pre view-tab').addLoading();
+            postJSON('/admin/sections/editor/template/preview/', {
+                source: source_editor.getValue()
+            }, function(data) {
+                $form.find('.preview-tab iframe').attr('src', data);
+            })
+        });
+        handlePaste = function(e) {
+            for (var i = 0 ; i < e.clipboardData.items.length ; i++) {
+                var item = e.clipboardData.items[i];
+                console.log("Item: " + item.type);
+                if (item.type.indexOf("image") != -1) {
+                    console.log(item);
+
+                    var data = item.getAsFile();
+                    var fr = new FileReader;
+                    fr.onloadend = function() {
+                        $('#id_image_base64').val(fr.result)
+                        CROP_INIT($form);
+                    };
+                    fr.readAsDataURL(data);
+
+                } else {
+                    console.log("Discardingimage paste data");
+                }
+            }
+        }
+        $form.find('.image-base64')[0].addEventListener("paste", handlePaste);
+        $form.on('submit', function() {
+
+            console.log($form);
+            var data = $form.serializeArray();
+            data.push({
+                name: 'source', value: source_editor.getValue()
+            });
+            console.log(data)
+            $.ajax({
+                method: $form.attr('method'),
+                url: $form.attr('action'),
+                data: data,
+                success: function(data) {
+                    data = $(data).addClass('in');
+                    console.log(data)
+                    if(data.is('form')) {
+                        $form.replaceWith(data)
+                        CREATE_INIT(data);
+                    }
+                }
+            })
+            return false;
+        })
+    }
+
+    $(document).on('click', '.template-add, .template-edit', function() {
+        $(this).sectionsModal({
+            target: $(this).data('href'),
+            open: function($modal, source_editor, textarea) {
+                CREATE_INIT($modal);
+            }
+        });
+        return false;
+    });
 
 
-function TemplateCategory(editor, data, self) {
+
+})
+
+
+function template_category_create(editor, parent) {
+
+    var page_name = prompt('Template name')
+    if(page_name && $.trim(page_name) != "") {
+        var page = new TemplateCategory({ editor: editor, name: page_name, parent: parent });
+        page.update();
+    }
+}
+
+// function page_reorder(pages) {
+//     page.$menuItem
+// }
+
+function templates_init(editor) {
+    $.get('/admin/sections/editor/templates/', null, function(data) {
+        for(var i in data) {
+            var template_category_data = data[i];
+            template_category_data.editor = editor
+            new TemplateCategory(data[i]);
+        }
+    });
+
+    editor.$templatesMenu = $('#template-categories-menu');
+    editor.$templatesMenu.on('click', '>.template-categories-add', function(e) {
+        template_category_create(editor)
+        e.stopPropagation();
+        return false;
+    });
+}
+
+function TemplateCategory(data, root, self) {
     self = this;
-    self.editor = editor;
+    self.init(data);
+    self.root = root;
+
+
+}
+TemplateCategory.prototype.init = function(data, self) {
+    self = this;
+    self.editor = data.editor;
+    self.parent = data.parent;
     self.pk = data.pk;
     self.name = data.name;
     self.order = data.order;
-    self.templates = []
-    // self.$menuItem = $('<li>\
-    //     <a data-pk="'+self.pk+'" class="trigger">'+self.name+'</a>\
-    // </li>');
-    // self.$menuItem.appendTo(self.editor.$templates_menu.find('.editor-template-menu'))
-    // self.$menuItem.on('click', 'a.trigger', function(e) {
+    self.templates = [];
 
-    //     $.fn.addLoadingFull();
-    //     self.editor.open_editor(self.get_editor(), 350);
-    // });
-    for(var i in data.templates) {
-        new Template(self, data.templates[i]);
-    }
+    if(!self.$menuItem) {
+        self.$menuItem = $('\
+            <li class="">\
+                <a data-pk="'+self.pk+'" class="trigger '+(data.templates && data.templates.length ? 'right-caret' : '') +'" >'+self.name+'</a>\
+                <ul class="dropdown-menu sub-menu">\
+                    <li class="template-categories-add">\
+                        <a class="">\
+                            <span class="fui-plus"></span>\
+                        </a>\
+                    </li>\
+                </ul>\
+            </li>')
+
+        self.$menuItem.on('click', 'a.trigger', function(e) {
+            self.open();
+            self.editor.close_editor();
+            $('#template_category_root').parent().removeClass('open')
+            e.stopPropagation();
+        })
+        self.$menuItem.on('click', '> ul > li.template-categories-add a', function(e) {
+            template_category_create(self.editor, self);
+            e.stopPropagation();
+        })
+
+        if(self.parent) {
+            self.parent.$menuItem.find('>ul').append(self.$menuItem);
+            self.parent.$menuItem.find('>ul>li').eq(-1).after(self.parent.$menuItem.find('>ul>li.template-categories-add'));
+            self.parent.pages.push(self);
+        }
+        else {
+            self.editor.$templatesMenu.append(self.$menuItem);
+            self.editor.$templatesMenu.find('>li').eq(-1).after(self.editor.$templatesMenu.find('>li.template-categories-add'));
+        }
+
+
+        for(var i in data.templates) {
+            new Template(self, data.templates[i]);
+        }
 
         new Template(self, {
             name: "New",
             source: 'new section',
             image: 'https://cdn4.iconfinder.com/data/icons/simplicio/128x128/file_add.png'
         });
-    self.editor.templates.push(self)
+        self.editor.templates.push(self)
+    }
+
+    self.$menuItem
+
 }
 TemplateCategory.prototype.get_editor = function(kwargs, self) {
     self = this;
@@ -46,6 +226,37 @@ TemplateCategory.prototype.get_editor = function(kwargs, self) {
     // }
     return kwargs.$editor;
 }
+
+TemplateCategory.prototype.update = function(callback, self) {
+    self = this
+    data = {
+        pk: self.pk,
+        parent: self.parent ? self.parent.pk : null,
+        name: self.name,
+    }
+    $.ajax({
+        method: 'POST',
+        url: '/admin/sections/editor/template_category/'+(self.pk ? 'update' : 'create')+'/',
+        data: JSON.stringify(data),
+        contentType: 'application/json; charset=utf-8',
+        success: function(data) {
+            self.init(data);
+        }
+    });
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 function Template(category, data, self) {

@@ -1,0 +1,26 @@
+<ul class="template-menu dropdown-menu {% if parent %}sub-menu{% endif %}">
+
+    {% for template in templates %}
+        {% include "sections/templates/_menu.html" with page=page %}
+    {% endfor %}
+    <li>
+        <a class="page-add" {% if parent %}data-parent="{{ page.pk }}"{% endif %}
+            onclick='
+
+                var page_name = prompt("Template category name");
+                var self = $(this);
+                if(page_name && $.trim(page_name) != "") {
+
+                    $.post("{% url 'sections_editor_template_category_create' %}", {
+                        name: page_name,
+                        parent: $(this).data("parent")
+                    }, function(data) {
+                        self.parent().before(data)
+                    });
+                }
+
+            '>
+            <span class="fui-plus"></span>
+        </a>
+    </li>
+</ul>

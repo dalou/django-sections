@@ -1,0 +1,46 @@
+
+@import 'src/django-sections/sections/styl/modals.styl'
+@import 'src/django-sections/sections/styl/tabs.styl'
+@import 'src/django-sections/sections/styl/templates.styl'
+
+trc()
+    tr(all 0.25s ease-out);
+
+tr-cl()
+    trc();
+
+bgshad()
+    bgi(linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.15)));
+
+bgshad-lt()
+    bgi(linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.05)));
+
+tshad()
+    tsh(rgba(0,0,0,0.15) 0 2px 2px);
+
+bs-lt()
+    //bs(0 1px 1px rgba(0,0,0,0.15) !important);
+    bs(0 1px 1px 1px rgba(0, 0, 0, 0.15) !important);
+    //  bs(#999 0 3px 8px -2px);
+bs-lg()
+    //bs(0 1px 1px rgba(0,0,0,0.15) !important);
+    bs(0 1px 20px 8px rgba(0,0,0,0.15) !important);
+
+.clear
+    cl();
+.fleft
+    fl();
+.fright
+    fr();
+.hidden
+    dn();
+
+.hidden
+    display: none !important;
+#main
+    #page-settings-menu
+        op(0); tr-cl();
+        ab(55,,,5,1);
+    &:hover
+        #page-settings-menu
+            op(1);

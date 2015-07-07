@@ -1,0 +1,38 @@
+<div class="sections-modal  template-list-modal">
+
+    <div class="sections-modal-head">
+        <span class="fui-new"></span> {{ category.name }} templates
+
+        <a href="#" class="close modal-close">
+            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </a>
+    </div>
+    <div class="sections-modal-content">
+
+        <ul class="template-list">
+            {% for template in templates %}
+                <li class="template" data-pk="{{ template.pk }}" {% if template.need_thumbnail %}data-need-thumbnail="1"{% endif %}>
+                    <img {% if template.image %}src="{{ template.image.url|default:"" }}"{% endif %}
+                    style="width:100%"
+                    >
+                    <div class="editor-template-actions">
+                        <a class="app btn btn-primary template-edit"
+                            data-href="{% url 'sections_editor_template_update' pk=template.pk %}">
+                            Edit <span class="fui-plus"></span>
+                        </a>
+                        <button type="button" class="insert btn btn-danger btn-sm deleteBlock"><span class="fui-plus"></span></button>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+
+    </div>
+    <div class="sections-modal-foot">
+        <a class="app btn btn-primary template-add"
+            data-href="{% url 'sections_editor_template_create' category=category.pk %}">
+            Create new template <span class="fui-plus"></span>
+        </a>
+
+
+    </div>
+</div>

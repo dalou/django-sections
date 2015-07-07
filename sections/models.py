@@ -21,7 +21,8 @@ from django.utils import importlib
 from django.db.models.loading import get_model
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
 from django.core.files.base import ContentFile
-from django.template.loader import get_template, render_to_string, get_template_from_string
+from django.template.loader import get_template, render_to_string
+from django.template import engines
 from django.template import Context, RequestContext, Template as DjangoTemplate
 import base64 as base64_original
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -68,7 +69,30 @@ from lxml import etree
 
 # print SECTIONS
 
+
+class Version(models.Model):
+
+    number = models.IntegerField(u"Version", default=1)
+    active = models.BooleanField(u"Active", default=False)
+
+    def save(self, *args, **kwargs):
+        super(Version, self).save(*args, **kwargs)
+
+
+    def __unicode__(self):
+        if self.active:
+            return "v%s (active)" % self.number
+        else:
+            return "v%s" % self.number
+
+    class Meta:
+        ordering = ('-number', )
+        verbose_name = u"Version"
+
+
 class Page(MPTTModel):
+
+    version = models.ForeignKey('sections.Version', related_name="pages", null=True, blank=True)
 
     parent = TreeForeignKey('self', null=True, blank=True, related_name='children')
     name = models.CharField(u"Nom", max_length=255, help_text="Le nom qui s'affichera dans le menu")
@@ -132,6 +156,7 @@ class Page(MPTTModel):
             (u"%s > " % unicode(self.parent)) if self.parent else "",
             self.name
         )
+
 
         self.slug = slug
         # i = 1
@@ -220,6 +245,8 @@ mptt_register(Page,)
 
 class TemplateCategory(models.Model):
 
+    version = models.ForeignKey('sections.Version', related_name="template_categories", null=True, blank=True)
+
     name = models.CharField(u"Nom", max_length=255)
     is_system = models.BooleanField(u"Systeme ?", default=False)
     is_ghost = models.BooleanField(u"Fantome ?", default=False)
@@ -240,12 +267,17 @@ class Template(models.Model):
 
     category = models.ForeignKey('sections.TemplateCategory', related_name="templates", null=True, blank=True)
 
+    version = models.ForeignKey('sections.Version', related_name="templates", null=True, blank=True)
+
     name = models.CharField(u"Nom", max_length=255)
-    source = models.TextField(u"source", default="Nouvelle section")
+    source = models.TextField(u"source", default="\n\n\n\n\n\nNouvelle section\n\n\n\n\n\n")
     # base64 = models.TextField(u"base64 img", blank=True, null=True)
     image = models.ImageField(_(u"Image"),
                                     upload_to=unique_filename("sections/templates/images/%Y/%m/"),
                                     blank=True, null=True)
+    image_base64 = models.TextField(u"image_base64", null=True, blank=True)
+    image_base64_crop = models.CharField(u"image_base64_crop", max_length=254, null=True, blank=True)
+
     public_hash = models.CharField(_(u"Hash public"), max_length=64, blank=True, null=True)
     order = models.IntegerField(u"Ordre", default=0)
 
@@ -281,10 +313,10 @@ class Template(models.Model):
             source = self.source
         tmpl = DjangoTemplate(source)
 
-        import pprint
-        print section
-        #if section.title.strip().lower() == "4x1_images_left_right":
-        pprint.pprint(section.data)
+        # import pprint
+        # print section
+        # #if section.title.strip().lower() == "4x1_images_left_right":
+        # pprint.pprint(section.data)
 
         context = RequestContext(request, {
             'section': section,
@@ -310,13 +342,13 @@ class Template(models.Model):
         if not self.public_hash:
             self.public_hash = random_token([self.name])
 
-        # if not self.image and self.base64:
+        if self.image_base64:
 
-        #     base64 = self.base64.replace("data:image/png;base64,", "")
+            base64 = self.image_base64.replace("data:image/png;base64,", "")
 
-        #     png_recovered = base64_original.decodestring(base64)
-        #     self.image = SimpleUploadedFile('uploaded_file.png', png_recovered, content_type='image/png')
-        #     self.base64 = None
+            png_recovered = base64_original.decodestring(base64)
+            self.image = SimpleUploadedFile('uploaded_file.png', png_recovered, content_type='image/png')
+            # self.base64 = None
 
 
         # if self.stylus:

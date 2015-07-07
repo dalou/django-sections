@@ -1,0 +1,15 @@
+<li class="dropdown" id="pages-menu">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="page-root-menu"
+        data-toooltip='{
+            "target": "#page-settings-tooltip",
+            "interactive": true,
+            "position": "right"
+        }'
+    >
+        <span class="glyphicon glyphicon-list-altttt" aria-hidden="true"></span> Pages <b class="caret"></b>
+
+    </a>
+    <span class="dropdown-arrow"></span>
+    {% include "sections/pages/_children.html" with pages=pages %}
+
+</li>

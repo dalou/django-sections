@@ -1,0 +1,11 @@
+<ul class="page-menu dropdown-menu {% if parent %}sub-menu{% endif %}">
+
+    {% for page in pages %}
+        {% include "sections/pages/_menu.html" with page=page %}
+    {% endfor %}
+    <li>
+        <a class="page-add" {% if parent %}data-parent="{{ page.pk }}"{% endif %}>
+            <span class="fui-plus"></span>
+        </a>
+    </li>
+</ul>

@@ -13,9 +13,11 @@
         <link href="{{ STATIC_URL }}sections/vendors/flat-ui/css/flat-ui.min.css" rel="stylesheet">
         <link href="{{ STATIC_URL }}sections/vendors/colpick.css" rel="stylesheet">
         <link href="{{ STATIC_URL }}sections/vendors/layout-default-latest.css" rel="stylesheet">
+        <link href="{{ STATIC_URL }}sections/vendors/cropper.css" rel="stylesheet">
 
         <link href="{{ STATIC_URL }}sections/css/loading.css" rel="stylesheet">
         <link href="{{ STATIC_URL }}sections/css/editor.css" rel="stylesheet">
+        <link href="{{ STATIC_URL }}sections/css/editor_css.css" rel="stylesheet">
         <link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet" />
 
 
@@ -40,6 +42,8 @@
 
         <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
 
+        <script src="{{ STATIC_URL }}sections/js/modals.js"></script>
+        <script src="{{ STATIC_URL }}sections/js/tooltips.js"></script>
         <script src="{{ STATIC_URL }}sections/js/templates.js"></script>
         <script src="{{ STATIC_URL }}sections/js/pages.js"></script>
         <script src="{{ STATIC_URL }}sections/js/sections.js"></script>
@@ -47,6 +51,7 @@
         <script src="{{ STATIC_URL }}sections/js/editor.js"></script>
 
         <script src="{{ STATIC_URL }}sections/js/plugins/main.js"></script>
+        <script src="{{ STATIC_URL }}sections/vendors/cropper.js"></script>
         <script src="{{ STATIC_URL }}sections/vendors/html2canvas.js"></script>
 
         <script src="{{ STATIC_URL }}sections/vendors/flat-ui/js/vendor/video.js"></script>
@@ -71,30 +76,50 @@
               <a class="navbar-brand" href="#">Page editor</a>
             </div> -->
             <div class="collapse navbar-collapse" id="navbar-collapse-01">
-              <ul class="nav navbar-nav navbar-left">
+                <ul class="nav navbar-nav navbar-left">
 
-                <li><a href="#fakelink"><span class="fui-home"></span></a></li>
+                    <li><a href="#fakelink"><span class="fui-home"></span></a></li>
 
-                <li class="dropdown" >
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="page_root">
-                        <span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Pages <b class="caret"></b>
-                    </a>
-                    <span class="dropdown-arrow"></span>
-                    <ul id="pages-menu" class="editor-pages-menu dropdown-menu">
-                        <li class="pages-add">
-                            <a>
-                                <span class="fui-plus"></span>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li id="add_section"></li>
-               </ul>
-               <ul class="nav navbar-nav navbar-right">
-                <li id="">
+
+                    <!--<li class="dropdown" id="version-menu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="page_root">
+                            <span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Pages <b class="caret"></b>
+                        </a>
+                        <span class="dropdown-arrow"></span>
+                        <ul class="editor-pages-menu dropdown-menu">
+                            <li class="pages-add">
+                                <a>
+                                    <span class="fui-plus"></span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>-->
+
+                    {% include "sections/versions/_root_menu.html" %}
+                    {% include "sections/pages/_root_menu.html" %}
+                    <li id="add_section"></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+
+                    {% include "sections/templates/_root_menu.html" %}
+
+                    <!-- <li class="dropdown" >
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="template_category_root">
+                            Templates <b class="caret"></b>
+                        </a>
+                        <span class="dropdown-arrow"></span>
+                        <ul id="template-categories-menu" class="editor-pages-menu dropdown-menu">
+                            <li class="template-categories-add">
+                                <a>
+                                    <span class="fui-plus"></span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li> -->
+                    <li id="">
                         <a href="{% url "admin:auth_user_changelist" %}">Users</a>
-                </li>
-               </ul>
+                    </li>
+                </ul>
 
                <!--<form class="navbar-form navbar-right" action="#" role="search">
 
@@ -119,6 +144,11 @@
        </div>
 
        <div id="main">
+
+            <div id="page-settings-menu">
+
+
+            </div>
             <iframe id="page" src=""></iframe>
         </div>
     </body>

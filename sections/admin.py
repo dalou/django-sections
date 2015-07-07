@@ -18,7 +18,6 @@ from django.forms.widgets import HiddenInput
 from tinymce.models import HTMLField
 from tinymce.widgets import TinyMCE
 from mptt.admin import MPTTModelAdmin
-from feincms.admin import tree_editor
 
 from sections.models import Page, Section, Template
 
@@ -58,7 +57,7 @@ class TemplateAdmin(admin.ModelAdmin):
 
 admin.site.register(Template, TemplateAdmin)
 
-class PageAdmin(tree_editor.TreeEditor):
+class PageAdmin(admin.ModelAdmin):
 
     formfield_overrides = {
         models.DateField: {'widget': DateTimeInput },
@@ -79,6 +78,7 @@ class PageAdmin(tree_editor.TreeEditor):
         'parent',
         'title',
         'order',
+        'version',
         'is_enabled',
         'is_default',
     )

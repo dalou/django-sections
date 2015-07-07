@@ -5,7 +5,7 @@
 {% block meta_title %}{{ block.super }}{% endblock meta_title %}
 
 
-{% block main %}
+{% block sections %}
 
 {% for section in page.sections.all %}
     {% render_section section %}

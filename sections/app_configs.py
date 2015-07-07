@@ -12,6 +12,16 @@ class DefaultConfig(AppConfig):
 
 
         from . import models
+
+        try:
+            version = models.objects.first()
+            if not version:
+                version = Version.objects.create()
+                models.TemplateCategory.objects.filter(version=None).update(version=version)
+                models.Page.objects.filter(version=None).update(version=version)
+        except:
+            pass
+
         # models.Template.objects.all().delete()
         # try:
         #     # non_system = models.Template.objects.filter(is_system=False)

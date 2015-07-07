@@ -1,0 +1,16 @@
+
+
+<li class="editor-template-menu"
+    id="template-{{ template.pk }}"
+    data-pk="{{ template.pk }}"
+    data-url="{{ template.get_absolute_url }}"
+    data-name="{{ template.full_name }}"
+    >
+    {% with template.get_descendants as children %}
+    <a  class="trigger {% if children %}right-caret{% endif %}"
+        data-modal="{% url 'sections_editor_template_list' pk=template.pk  %}">
+        {{ template.templates.count }} - {{ template.name }}
+    </a>
+    {% include "sections/templates/_children.html" with templates=children parent=template %}
+    {% endwith %}
+</li>

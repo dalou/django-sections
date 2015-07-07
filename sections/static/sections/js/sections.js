@@ -14,7 +14,7 @@ function Section(data, self) {
     self.$selected_element = null;
     self.data = {}
 
-    self.page.sections.push(self)
+    self.page.sections.push(self);
 
     if(self.$section) {
         self.$section[0].section = self;

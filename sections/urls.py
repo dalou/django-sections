@@ -1,6 +1,8 @@
 from django.conf.urls import patterns, url
 
-from . import views
+import sections.views.editor
+import sections.views.page
+import sections.views.template
 
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
@@ -18,35 +20,65 @@ from django.views.decorators.csrf import csrf_exempt
 # urlpatterns += patterns('',
 #     url(r'^cr/(\d+)/(.+)/$', 'django.contrib.contenttypes.views.shortcut',
 #         name='documents-url-redirect'),
-# )
+#
 
 urlpatterns = patterns('sections.views',
     # url(r'^admin/section/update/$', login_required(views.update_section), name="sections_update_section"),
     # url(r'^admin/section/remove/$', login_required(views.remove_section), name="sections_remove_section"),
     # url(r'^admin/section/live-edit/$', login_required(views.SectionLiveEdit.as_view()), name="sections_live-edit"),
 
-    url(r'^admin/sections/editor/$', login_required(views.EditorView.as_view()), name="sections_editor"),
+    url(r'^admin/sections/editor/$', login_required(sections.views.editor.Editor.as_view()), name="sections_editor"),
 
-    url(r'^admin/sections/editor/pages/$', login_required(views.editor_pages), name="sections_editor_pages"),
-    url(r'^admin/sections/editor/pages/reorder/$', login_required(views.editor_pages_reorder), name="sections_editor_pages_reorder"),
-    url(r'^admin/sections/editor/page/update/$', login_required(views.editor_page_update), name="sections_editor_page_update"),
-    url(r'^admin/sections/editor/page/create/$', login_required(views.editor_page_create), name="sections_editor_page_create"),
-    url(r'^admin/sections/editor/page/remove/$', login_required(views.editor_page_remove), name="sections_editor_page_remove"),
+    # url(r'^admin/sections/editor/pages/$', login_required(views.editor_pages), name="sections_editor_pages"),
+    # url(r'^admin/sections/editor/pages/reorder/$', login_required(views.editor_pages_reorder), name="sections_editor_pages_reorder"),
+    # url(r'^admin/sections/editor/page/update/$', login_required(views.editor_page_update), name="sections_editor_page_update"),
+    # url(r'^admin/sections/editor/page/create/$', login_required(views.editor_page_create), name="sections_editor_page_create"),
+    # url(r'^admin/sections/editor/page/remove/$', login_required(views.editor_page_remove), name="sections_editor_page_remove"),
 
-    url(r'^admin/sections/editor/templates/$', login_required(views.editor_templates), name="sections_editor_templates"),
-    url(r'^admin/sections/editor/template/update/$', login_required(views.editor_template_update), name="sections_editor_template_update"),
-    url(r'^admin/sections/editor/template/create/$', login_required(views.editor_template_create), name="sections_editor_template_create"),
-    url(r'^admin/sections/editor/template/remove/$', login_required(views.editor_template_remove), name="sections_editor_template_remove"),
-    url(r'^admin/sections/editor/template/preview/$', login_required(views.editor_template_preview), name="sections_editor_template_preview"),
+    # url(r'^admin/sections/editor/templates/$', login_required(views.editor_templates), name="sections_editor_templates"),
+    url(r'^admin/sections/editor/template/(?P<pk>[\d]+)/update/$',
+        login_required(sections.views.template.TemplateSave.as_view()),
+         name="sections_editor_template_update"
+    ),
+    url(r'^admin/sections/editor/template/create/(?P<category>[\d]+)/$',
+        csrf_exempt(login_required(sections.views.template.TemplateSave.as_view())),
+        name="sections_editor_template_create"
+    ),
+    url(r'^admin/sections/editor/template/(?P<pk>[\d]+)/remove/$',
+        login_required(sections.views.template.TemplateRemove.as_view()),
+        name="sections_editor_template_remove"
+    ),
+    # url(r'^admin/sections/editor/template/preview/$', login_required(views.editor_template_preview), name="sections_editor_template_preview"),
+    url(r'^admin/sections/editor/template/(?P<pk>[\d]+)/list/$',
+        login_required(sections.views.template.TemplateList.as_view()),
+        name="sections_editor_template_list"
+    ),
 
-    url(r'^admin/sections/editor/sections/reorder/$', login_required(views.editor_sections_reorder), name="sections_editor_sections_reorder"),
-    url(r'^admin/sections/editor/section/update/$', login_required(views.editor_section_update), name="sections_editor_section_update"),
-    url(r'^admin/sections/editor/section/create/$', login_required(views.editor_section_create), name="sections_editor_section_create"),
-    url(r'^admin/sections/editor/section/remove/$', login_required(views.editor_section_remove), name="sections_editor_section_remove"),
-    url(r'^admin/sections/editor/section/preview/$', login_required(views.editor_section_preview), name="sections_editor_section_preview"),
+    url(r'^admin/sections/editor/template/preview/$',
+        login_required(sections.views.template.preview),
+        name="sections_editor_template_preview"
+    ),
+    url(r'^admin/sections/editor/template_category/(?P<pk>[\d]+)/update/$',
+        login_required(sections.views.template.TemplateCategorySave.as_view()),
+        name="sections_editor_template_category_update"
+    ),
+    url(r'^admin/sections/editor/template_category/create/$',
+        csrf_exempt(login_required(sections.views.template.TemplateCategorySave.as_view())),
+        name="sections_editor_template_category_create"
+    ),
+    url(r'^admin/sections/editor/template_category/(?P<pk>[\d]+)/remove/$',
+        login_required(sections.views.template.TemplateCategoryRemove.as_view()),
+        name="sections_editor_template_category_remove"
+    ),
+
+    # url(r'^admin/sections/editor/sections/reorder/$', login_required(views.editor_sections_reorder), name="sections_editor_sections_reorder"),
+    # url(r'^admin/sections/editor/section/update/$', login_required(views.editor_section_update), name="sections_editor_section_update"),
+    # url(r'^admin/sections/editor/section/create/$', login_required(views.editor_section_create), name="sections_editor_section_create"),
+    # url(r'^admin/sections/editor/section/remove/$', login_required(views.editor_section_remove), name="sections_editor_section_remove"),
+    # url(r'^admin/sections/editor/section/preview/$', login_required(views.editor_section_preview), name="sections_editor_section_preview"),
 
 
-    url(r'^admin/sections/editor/upload/image/$', login_required(views.editor_upload_image), name="sections_editor_upload_image"),
+    # url(r'^admin/sections/editor/upload/image/$', login_required(views.editor_upload_image), name="sections_editor_upload_image"),
 
 
 
@@ -69,5 +101,6 @@ urlpatterns = patterns('sections.views',
 
     # url(r'^section/template/preview/$', views.section_preview, name="sections_template-preview"),
 
-    url(r'^(?P<pk>[\d]+)/(?P<slug>[-_\w]*)$', views.PageView.as_view(), name="sections_page-view"),
+    url(r'^$', sections.views.page.PageDefaultView.as_view(), name="sections_page-view-default"),
+    url(r'^(?P<pk>[\d]+)/(?P<slug>[-_\w]*)$', sections.views.page.PageView.as_view(), name="sections_page-view"),
 )

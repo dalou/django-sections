@@ -1,5 +1,15 @@
 // var sections_plugins = []
 
+var postJSON = function(url, data, success) {
+    $.ajax({
+        method: 'POST',
+        url: url,
+        data: JSON.stringify(data),
+        contentType: 'application/json; charset=utf-8',
+        headers: {'content-type': 'application/json'},
+        success: success
+    });
+}
 
 
 Template.prototype.edit = function(self) {
@@ -28,7 +38,7 @@ Template.prototype.edit = function(self) {
 }
 
 
-function Editor(self) {
+function Editor(version, self) {
     self = this;
 
     self.values = [];
@@ -37,6 +47,7 @@ function Editor(self) {
     self.inputs = [];
     self.pages = {}
     self.templates = [];
+    self.version = version;
 
     self.current_page = null;
 
@@ -65,19 +76,20 @@ Editor.prototype.init = function(data, self) {
     self = this;
 
     self.$section_action = $('#section-actions')
-    self.$page = $('#page');
     self.$main = $('#main');
     self.$sidebar = $('#sidebar');
     self.$editor = $('#editor')
-    self.$pagesMenu = $('#pages-menu');
     self.$templates = $('#templates');
     self.current_page = null;
+    self.$page = $('#page');
 
-    self.$editor.accordion()
+    //self.$editor.accordion()
+
+    // templates_init(this);
+    // pages_init(this);
 
 
-    self.load_pages();
-    self.load_templates();
+    /* PAGES */
 
 
     /************** EDITOR ***************/
@@ -101,22 +113,6 @@ Editor.prototype.init = function(data, self) {
 
 
     /************** PAGES ***************/
-    self.$page.load(function() {
-
-
-
-        self.current_page = null;
-        var url = self.$page.contents().get(0).location.pathname;
-
-        if(self.pages[url]) {
-            self.current_page = self.pages[url];
-            self.pages[url].load();
-        }
-        else {
-            self.current_page = null;
-        }
-
-    });
 
     $('#page-container button.page-delete').on('click', function() {
         self.current_page.remove();
@@ -193,70 +189,6 @@ Editor.prototype.postJSON = function(url, data, success, self) {
     });
 }
 
-Editor.prototype.load_templates = function(self) {
-    self = this;
-    $.get('/admin/sections/editor/templates/', null, function(data) {
-        for(var i in data) {
-            new TemplateCategory(self, data[i]);
-        }
-    });
-}
-Editor.prototype.load_pages = function(self) {
-    self = this;
-    $.get('/admin/sections/editor/pages/', null, function(data) {
-        for(var i in data) {
-            var page_data = data[i];
-            page_data.editor = self
-            new Page(page_data);
-        }
-
-        var hash = document.location.hash;
-        console.log(hash)
-        if(!hash) {
-            self.pages[data[0].url].open();
-        }
-        else {
-            var page = self.pages[hash.split('#')[1]]
-            if(page) {
-                page.open();
-            }
-            else {
-
-            }
-
-        }
-        self.$pagesMenu.find('>ul').sortable({
-            items: 'li.editor-page-menu',
-            //handle: "> li a",
-            tolerance: "pointer",
-            containment: 'parent',
-            update: function(event, ui, orders) {
-                orders = []
-                $(ui.item.parent()).find('>li>a.trigger').each(function(i) {
-                    orders.push({
-                        pk: $(this).data('pk'),
-                        order: i
-                    });
-                });
-
-                $.ajax({
-                    method: 'POST',
-                    url: '/admin/sections/editor/pages/reorder/',
-                    data: JSON.stringify(orders),
-                    contentType: 'application/json; charset=utf-8',
-                    headers: {'content-type': 'application/json'},
-                    success: function(data) {
-                    }
-                });
-            }
-        });
-        self.$pagesMenu.on('click', '>.pages-add', function(e) {
-            page_create(self)
-            e.stopPropagation();
-            return false;
-        });
-    });
-}
 
 
 // Editor.prototype.insert_template = function($template, self) {
@@ -301,27 +233,54 @@ $(document).ready(function(editor, DATA, IFRAME, TEMPLATES, SIDEBAR, PAGES, drop
     //     $(document).unbind('mousemove');
     // });
 
-    $(function(){
-        $(document).on("mouseenter",".dropdown-menu > li > a.trigger", function(e){
-            var current=$(this).next();
-            var grandparent=$(this).parent().parent();
-            if($(this).hasClass('left-caret')||$(this).hasClass('right-caret'))
-                $(this).toggleClass('right-caret left-caret');
-            grandparent.find('.left-caret').not(this).toggleClass('right-caret left-caret');
-            grandparent.find(".sub-menu:visible").not(current).hide();
-            current.toggle();
-            e.stopPropagation();
-        });
-        $(document).on("mouseenter",".dropdown-menu > li > a:not(.trigger)", function(){
-            var root=$(this).parents('.dropdown-menu').eq(0);
-            root.find('.left-caret').toggleClass('right-caret left-caret');
-            root.find('.sub-menu:visible').hide();
-        });
+
+    $(document).on("mouseenter",".dropdown-menu > li > a.trigger", function(e){
+        var current=$(this).next();
+        var grandparent=$(this).parent().parent();
+        if($(this).hasClass('left-caret')||$(this).hasClass('right-caret'))
+            $(this).toggleClass('right-caret left-caret');
+        grandparent.find('.left-caret').not(this).toggleClass('right-caret left-caret');
+        grandparent.find(".sub-menu:visible").not(current).hide();
+        current.toggle();
+        e.stopPropagation();
     });
+    $(document).on("mouseenter",".dropdown-menu > li > a:not(.trigger)", function(){
+        var root=$(this).parents('.dropdown-menu').eq(0);
+        root.find('.left-caret').toggleClass('right-caret left-caret');
+        root.find('.sub-menu:visible').hide();
+    });
+
     $(document).on('click', ".nav-tabs a",  function (e) {
-      e.preventDefault();
-      $(this).tab("show");
+        e.preventDefault();
+        $(this).parents('.nav-tabs').eq(0).find('li').removeClass('active');
+        $(this).parent().addClass("active");
+
+        var $target = $($(this).attr('href'))
+        $target.parent().find('.tab-content').removeClass('active');
+        $target.addClass("active");
     })
+
+
+
+    $(document).on("click","[data-sidebar]", function(e){
+        $('#editor').empty().addLoading()
+        $.get($(this).data('sidebar'), null, function(data) {
+            $('#editor').append(data);
+            $('#editor').removeLoading()
+        });
+
+
+        $('#editor').stop().animate({ left: 0, width: 250 }, function() {
+
+        });
+        $('#page').contents().find('body').animate({ zoom: 0.8  });
+        $('#main').stop().animate({ marginLeft: 250  });
+
+    });
+
+
+
+
 
     $.fn.addLoadingFull();
     PageEditor.init();
