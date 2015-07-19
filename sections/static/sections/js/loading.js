@@ -66,9 +66,9 @@ $.fn.removeLoading = function($self) {
     // })
 }
 $(document).ready(function() {
-    $('[data-image-loading]').addLoading().imagesLoaded(function() {
-        $(this).removeLoading();
-    })
+    // $('[data-image-loading]').addLoading().imagesLoaded(function() {
+    //     $(this).removeLoading();
+    // })
 
-    $('[data-loading]').addLoading();
+    // $('[data-loading]').addLoading();
 });

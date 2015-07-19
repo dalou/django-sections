@@ -1,0 +1,22 @@
+#context-menu
+    bs(0 2px 6px 0 rgba(0, 0, 0, 0.54));
+    ul
+
+        p(0); m(0); fg(#e1e4e7); fs(14); bgc(grey-lt);  rad(4); lsn();
+
+        li
+            a
+                fg(#666); p(3,20);  bg(#fff); db(); fs(15); bt(1,solid,#ccc); tr-cl(); cur(pointer);
+                &:hover
+                    fg(#2f4154);
+
+            &.link
+                p(0,5)
+                button
+                    m(5,2);
+
+            &.title
+                fg(#fff); p(3,12); bg(#2f4154); fs(16);
+
+            &.divider
+                dn()

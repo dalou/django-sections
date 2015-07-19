@@ -14,12 +14,13 @@ class DefaultConfig(AppConfig):
         from . import models
 
         try:
-            version = models.objects.first()
+            version = models.Version.objects.first()
             if not version:
-                version = Version.objects.create()
+                version = models.Version.objects.create()
                 models.TemplateCategory.objects.filter(version=None).update(version=version)
                 models.Page.objects.filter(version=None).update(version=version)
-        except:
+        except Exception, e:
+            print str(e.message)
             pass
 
         # models.Template.objects.all().delete()

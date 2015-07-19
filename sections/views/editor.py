@@ -41,6 +41,7 @@ class Editor(generic.TemplateView):
     template_name = "sections/editor.html"
 
     def get(self, request, *args, **kwargs):
+        return HttpResponseRedirect('/')
         return super(Editor, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -50,7 +51,9 @@ class Editor(generic.TemplateView):
         ctx['versions'] = Version.objects.all()
         ctx['current_version'] = current_version
 
-        print Template.objects.all().count()
+
+
+        print ctx
 
         ctx['template_categories'] = TemplateCategory.objects.exclude(is_ghost=True)
         return ctx

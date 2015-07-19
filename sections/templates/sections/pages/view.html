@@ -5,9 +5,59 @@
 {% block meta_title %}{{ block.super }}{% endblock meta_title %}
 
 
+{% block extra_head %}
+    {% if request.user.is_superuser %}
+    <!--<script src="https://code.jquery.com/jquery-1.11.3.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>-->
+    <link href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}sections/vendors/tooltipster.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}sections/css/editor_css.css" rel="stylesheet">
+
+    <script src="{{ STATIC_URL }}sections/vendors/dropzone.min.js"></script>
+    <script src="{{ STATIC_URL }}sections/vendors/imagesloaded.pkgd.min.js"></script>
+    <script src="{{ STATIC_URL }}sections/vendors/jquery.layout-latest.js"></script>
+
+    <script src="{{ STATIC_URL }}sections/vendors/jquery.tooltipster.min.js"></script>
+
+
+    <script src="{{ STATIC_URL }}sections/vendors/tinymce/tinymce.min.js"></script>
+    <script src="{{ STATIC_URL }}sections/vendors/jquery.smooth-scroll.min.js"></script>
+    <script src="{{ STATIC_URL }}sections/vendors/colpick.js"></script>
+    <script src="{{ STATIC_URL }}sections/vendors/isotope.pkgd.min.js"></script>
+
+    <script type="text/javascript">
+        window.__sections__current_page = {{ page.pk }};
+    </script>
+
+    <script src="{{ STATIC_URL }}sections/js/loading.js"></script>
+    <script src="{{ STATIC_URL }}sections/js/modals.js"></script>
+
+    <script src="{{ STATIC_URL }}sections/js/editor.js"></script>
+    <script src="{{ STATIC_URL }}sections/js/pages.js"></script>
+    <script src="{{ STATIC_URL }}sections/js/sections.js"></script>
+    <script src="{{ STATIC_URL }}sections/js/templates.js"></script>
+    <script src="{{ STATIC_URL }}sections/js/elements.js"></script>
+    <script src="{{ STATIC_URL }}sections/js/version.js"></script>
+
+    <script src="{{ STATIC_URL }}sections/js/fields.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/ace.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/mode-html.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/mode-twig.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/mode-stylus.js"></script>
+    {% endif %}
+{% endblock %}
+
+
 {% block sections %}
+
+
+
 
 {% for section in page.sections.all %}
     {% render_section section %}
 {% endfor %}
+
+
+
 {% endblock %}

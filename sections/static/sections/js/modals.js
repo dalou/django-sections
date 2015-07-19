@@ -147,6 +147,9 @@ $(document).ready(function(click) {
             data.MODAL_BLOCKER = data.MODAL_WRAPPER.parent().on('click', function(event) {
 
 
+                if($(event.target).hasClass('___modal_wrapper')) {
+                    $(event.target).find(">*").eq(0).sectionsModal('close');
+                }
                 if($(event.target).hasClass('___modal_blocker')) {
                     $(event.target).find(">*>*").eq(0).sectionsModal('close');
                 }
@@ -163,7 +166,7 @@ $(document).ready(function(click) {
                 }
             //}, 200)
 
-             data.MODAL_BLOCKER.on('click', '.modal-close', function() {
+             data.MODAL_BLOCKER.on('click', '.sections-modal-close', function() {
                 data.MODAL_BLOCKER.find(">*>*").eq(0).sectionsModal('close');
             });
 

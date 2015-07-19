@@ -30,7 +30,7 @@ from django.template import Context, RequestContext, Template as DjangoTemplate
 
 
 
-from sections.models import Version, Page, Section, Template, TemplateCategory, SectionImage
+from sections.models import SectionImage
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 @require_POST
 @login_required
 @csrf_exempt
-def editor_upload_image(request):
+def upload_image(request):
     image = request.FILES['image']
     section_image, created = SectionImage.objects.get_or_create(image=image)
     print "IMAGE CREATED", created

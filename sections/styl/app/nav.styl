@@ -1,0 +1,43 @@
+.__sections__
+
+    .navbar
+        mb(0); rad(0); dib(); rad(0,0,10,10); mnh(10);
+        box-shadow: -10px 0 2px rgba(0, 0, 0, 0.08) inset;
+        > div
+            dib();
+
+        li.separator
+            bt(1,solid,grey); bb(1,solid,grey-dk);
+
+    .navbar-nav > li > a
+        fs(12);
+    // .navbar-nav > li
+    //     float:none;
+
+
+    &.__sections__nav
+        dib(); fx(10,,,10,1000000); op(0.5); tr-cl();
+        position:fixed !important;
+        .__sections__nav_handle
+            p(0,0,0,20); rl(); h(24); bd(0); rad(10,10,0,0); bd(2,2,2,2,solid,#16a085);
+            bg(#16A085); cur(pointer); fg(white);
+
+        #__sections__versions_menu
+            rad(0,0,0,10);
+        #__sections__templates_menu
+            rad(0,0,10,0);
+
+        &:hover
+            op(1);
+
+        .__section__nav_a
+            p(5,10);
+
+        .navbar-collapse .navbar-nav.navbar-left:first-child
+            m(0,auto);
+
+        .navbar-collapse
+            p(0);
+
+        .navbar-collapse .navbar-nav.navbar-left:first-child > li:first-child a
+            rad(0,0,0,10);

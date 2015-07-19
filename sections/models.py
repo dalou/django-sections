@@ -70,24 +70,52 @@ from lxml import etree
 # print SECTIONS
 
 
-class Version(models.Model):
+class Version(MPTTModel):
 
     number = models.IntegerField(u"Version", default=1)
     active = models.BooleanField(u"Active", default=False)
+    parent = TreeForeignKey('self', null=True, blank=True, related_name='children')
+    is_current = False
+    tree = TreeManager()
 
     def save(self, *args, **kwargs):
+        if not kwargs.get('no_activation') and self.active == True:
+            Version.objects.update(active=False)
+            self.active = True
         super(Version, self).save(*args, **kwargs)
+
+        if not self.pages.count():
+            page = Page(version=self, name="Home", is_default=True)
+            page.save()
+
 
 
     def __unicode__(self):
         if self.active:
-            return "v%s (active)" % self.number
+            return "v%s (active)" % self.get_number()
         else:
-            return "v%s" % self.number
+            return "v%s" % self.get_number()
+
+    def get_number(self):
+        return '%s.%s' % (self.parent.get_number(), self.number) if self.parent else ('%s.0' % self.number)
 
     class Meta:
         ordering = ('-number', )
         verbose_name = u"Version"
+
+
+    def to_json(self, current=None):
+        if current and current.pk == self.pk:
+            self.is_current = True
+        return {
+            'pk': self.pk,
+            'number': self.get_number(),
+            'is_active': self.active,
+            'is_current': self.is_current,
+            'versions': [ child.to_json(current) for child in self.get_descendants() ]
+        }
+
+mptt_register(Version,)
 
 
 class Page(MPTTModel):
@@ -108,7 +136,7 @@ class Page(MPTTModel):
     title = models.CharField(u"Titre", max_length=255)
 
     resume = HTMLField(u"Résumé", help_text="Texte d'introduction", blank=True, null=True)
-    slug = models.SlugField(u"Slug", unique=True, max_length=255, help_text="Identifiant unique de la catégorie")
+    slug = models.SlugField(u"Slug", max_length=255)
 
     order = models.IntegerField(u"Ordre", default=0)
     is_enabled = models.BooleanField(u"Activée", default=True)
@@ -140,6 +168,22 @@ class Page(MPTTModel):
             self.save()
         return self.full_name
 
+    def clone(self, version):
+        self.pk = None
+        self.version = version
+        self.save()
+        for page in self.children.all():
+            page.parent = self
+            page.clone()
+
+
+        for section in self.sections.all():
+            section.page = self
+            page.clone()
+
+
+
+
     def save(self, *args, **kwargs):
         #if not self.slug:
         name = [self.name]
@@ -151,18 +195,19 @@ class Page(MPTTModel):
             pass
         name.reverse()
         slug = slugify("_".join(name))
-
         self.full_name = u"%s%s" % (
             (u"%s > " % unicode(self.parent)) if self.parent else "",
             self.name
         )
-
 
         self.slug = slug
         # i = 1
         # while Category.objects.exclude(pk=self.pk).filter(slug=self.slug).exists():
         #     self.slug = "%s-%s" % (slug, i)
         #     i += 1
+
+        # if not Page.objects.filter(is_default=True).count():
+        #     self.is_default = True
 
         super(Page, self).save(*args, **kwargs)
 
@@ -209,6 +254,7 @@ class Page(MPTTModel):
             'name': self.name,
             'order': self.order,
             'url': self.get_absolute_url(),
+            'is_default': self.is_default,
             # 'sections': sections,
             'pages': [ child.to_json() for child in self.get_descendants() ]
         }
@@ -254,6 +300,13 @@ class TemplateCategory(models.Model):
     def __unicode__(self):
         return u"%s" % ( self.name )
 
+    def clone(self, version):
+        self.pk = None
+        self.version = version
+        self.save()
+        for template in self.templates.all():
+            template.category = self
+            template.clone()
 
     def to_json(self):
         return {
@@ -291,6 +344,10 @@ class Template(models.Model):
     def __unicode__(self):              # __unicode__ on Python 2
         return u"%s" % ( self.name )
 
+    def clone(self, version):
+        self.pk = None
+        self.version = version
+        self.save()
 
     def to_json(self):
         return {
@@ -303,9 +360,9 @@ class Template(models.Model):
 
     def render(self, request, section=None, layout=True):
         if layout:
-            source = """{% extends 'base.html' %}
+            source = """{% extends "sections_layout.html" %}
             {% block header %}{% endblock %}
-            {% block main %}
+            {% block sections %}
                 """ + self.source + """
             {% endblock %}
             {% block footer %}{% endblock %}"""
@@ -408,9 +465,9 @@ class Section(models.Model):
 
     title = models.CharField(u"Titre", max_length=255, default="Section 1")
 
-    instance_type = models.ForeignKey(ContentType, null=True, blank=True)
-    instance_id = models.PositiveIntegerField(null=True, blank=True)
-    instance = GenericForeignKey('instance_type', 'instance_id')
+    # instance_type = models.ForeignKey(ContentType, null=True, blank=True)
+    # instance_id = models.PositiveIntegerField(null=True, blank=True)
+    # instance = GenericForeignKey('instance_type', 'instance_id')
 
     order = models.IntegerField(u"Ordre", default=0)
     is_enabled = models.BooleanField(u"Activée", default=True)

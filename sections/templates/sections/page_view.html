@@ -7,6 +7,9 @@
 
 {% block main %}
 
+
+        <script src="{{ STATIC_URL }}sections/js/editor.js"></script>
+
 {% for section in page.sections.all %}
     {% render_section section %}
 {% endfor %}

@@ -1,46 +1,57 @@
 
-@import 'src/django-sections/sections/styl/modals.styl'
-@import 'src/django-sections/sections/styl/tabs.styl'
+
+
+
+
 @import 'src/django-sections/sections/styl/templates.styl'
+@import 'src/django-sections/sections/styl/context_menu.styl'
+@import 'src/django-sections/sections/styl/app/*.styl'
 
-trc()
-    tr(all 0.25s ease-out);
+.__sections__
 
-tr-cl()
-    trc();
+    fs(11);
 
-bgshad()
-    bgi(linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.15)));
+    .navbar
 
-bgshad-lt()
-    bgi(linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.05)));
 
-tshad()
-    tsh(rgba(0,0,0,0.15) 0 2px 2px);
+    trc()
+        tr(all 0.25s ease-out);
 
-bs-lt()
-    //bs(0 1px 1px rgba(0,0,0,0.15) !important);
-    bs(0 1px 1px 1px rgba(0, 0, 0, 0.15) !important);
-    //  bs(#999 0 3px 8px -2px);
-bs-lg()
-    //bs(0 1px 1px rgba(0,0,0,0.15) !important);
-    bs(0 1px 20px 8px rgba(0,0,0,0.15) !important);
+    tr-cl()
+        trc();
 
-.clear
-    cl();
-.fleft
-    fl();
-.fright
-    fr();
-.hidden
-    dn();
+    bgshad()
+        bgi(linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.15)));
 
-.hidden
-    display: none !important;
-#main
-    #page-settings-menu
-        op(0); tr-cl();
-        ab(55,,,5,1);
-    &:hover
+    bgshad-lt()
+        bgi(linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0.05)));
+
+    tshad()
+        tsh(rgba(0,0,0,0.15) 0 2px 2px);
+
+    bs-lt()
+        //bs(0 1px 1px rgba(0,0,0,0.15) !important);
+        bs(0 1px 1px 1px rgba(0, 0, 0, 0.15) !important);
+        //  bs(#999 0 3px 8px -2px);
+    bs-lg()
+        //bs(0 1px 1px rgba(0,0,0,0.15) !important);
+        bs(0 1px 20px 8px rgba(0,0,0,0.15) !important);
+
+    .clear
+        cl();
+    .fleft
+        fl();
+    .fright
+        fr();
+    .hidden
+        dn();
+
+    .hidden
+        display: none !important;
+    #main
         #page-settings-menu
-            op(1);
+            op(0); tr-cl();
+            ab(55,,,5,1);
+        &:hover
+            #page-settings-menu
+                op(1);

@@ -14,6 +14,9 @@ function Section(data, self) {
     self.$selected_element = null;
     self.data = {}
 
+
+    //console.log('SECTION INIT', self)
+
     self.page.sections.push(self);
 
     if(self.$section) {
@@ -30,15 +33,21 @@ function Section(data, self) {
             });
         });
 
-        self.$section.on('click', function(e)
-        {
-            self.editor.open_editor(self.get_editor());
+        self.$section.on('dblclick', function(e) {
+            self.editor.open_form(self);
+            e.stopPropagation()
+            return false;
         });
-        self.$section.on('click', 'a', function(e)
-        {
-            self.propagate = true;
-            return true;
-        });
+
+        // self.$section.on('click', function(e)
+        // {
+        //     self.editor.open_editor(self.get_editor());
+        // });
+        // self.$section.on('click', 'a', function(e)
+        // {
+        //     self.propagate = true;
+        //     return true;
+        // });
 
         if(self.$section.data('element')) {
             new Element({
@@ -46,10 +55,10 @@ function Section(data, self) {
                 $element: self.$section
             });
         }
-        self.$section.find('[data-element]').each(function() {
+        self.$section.find('[data-element]').each(function(i, elm) {
             new Element({
                 section: self,
-                $element: $(this)
+                $element: $(elm)
             });
         });
     }
@@ -77,9 +86,14 @@ function Section(data, self) {
     // });
 }
 
+Section.prototype.cancel = function(self) {
+    self = this;
+    self.page.cancel();
+}
 
 
-Section.prototype.update = function(callback, self) {
+
+Section.prototype.save = function(callback, self) {
     self = this;
     var data = self.pk ? {
         pk: self.pk,
@@ -107,6 +121,7 @@ Section.prototype.update = function(callback, self) {
             }
         }
     });
+    self.page.save();
 
 }
 Section.prototype.target = function(self) {
@@ -185,37 +200,48 @@ Section.prototype.to_data = function(reload, data, data_by_key, self) {
 Section.prototype.move_up = function(kwargs, self) {
     self = this;
     self.$section.prev('[data-section]').before(self.$section);
-    kwargs.section = self
+    //kwargs.section = self
     self.page.reorder_sections(kwargs);
     self.target();
 }
 Section.prototype.move_down = function(kwargs, self) {
     self = this;
     self.$section.next('[data-section]').after(self.$section);
-    kwargs.section = self
+    //kwargs.section = self
     self.page.reorder_sections(kwargs);
     self.target();
 }
 
-Section.prototype.get_editor = function(template, callback, self) {
+Section.prototype.set_form = function(form, template, callback, self) {
     self = this;
 
-    var $editor = $('\
-        <div class="editor-element">\
-            <h3 class="pull-left"><span class="fui-new"></span> Section : <span>'+self.order+'</span></h3>\
-            <div class="editor-section-actions pull-right">\
-                <button type="button" class="up btn btn-xs btn-inverse"><span class="fui-triangle-up"></span></button>\
-                <button type="button" class="down btn btn-xs btn-inverse"><span class="fui-triangle-down"></span></button>\
-                <button type="button" class="target btn btn-xs btn-primary"><span class="fui-eye"></span></button>\
-                <button type="button" class="delete btn btn-xs btn-danger"><span class="fui-trash"></span></button>\
-            </div>\
-            <div class="clearfix"></div>\
-        </div>')
-        .on('click', '.editor-section-actions button.up', function() { self.move_up({ $editor: $editor }); })
-        .on('click', '.editor-section-actions button.down', function() { self.move_down({ $editor: $editor }); })
-        .on('click', '.editor-section-actions button.delete', function() { self.remove({ $editor: $editor }); })
-        .on('click', '.editor-section-actions button.target', function() { self.target({ $editor: $editor }); })
-    $editor.prepend(self.page.get_editor())
-    return $editor;
+    var $content = $('<div >\
+        <button type="button" class="up btn btn-xs btn-inverse"><span class="fui-triangle-up"></span></button>\
+        <button type="button" class="down btn btn-xs btn-inverse"><span class="fui-triangle-down"></span></button>\
+        <button type="button" class="target btn btn-xs btn-primary"><span class="fui-eye"></span></button>\
+        <button type="button" class="delete btn btn-xs btn-danger"><span class="fui-trash"></span></button>\
+    </div>');
+    form.add_tab('Section', $content);
+    self.page.set_form(form);
+
+    $content.on('click', '.up', function() { self.move_up(); })
+    $content.on('click', '.down', function() { self.move_down(); })
+    $content.on('click', '.delete', function() { self.remove(); })
+    $content.on('click', '.target', function() { self.target(); })
+
+    // var $editor = $('\
+    //     <div class="editor-element">\
+    //         <h3 class="pull-left"><span class="fui-new"></span> Section : <span>'+self.order+'</span></h3>\
+    //         <div class="editor-section-actions pull-right">\
+    //             <button type="button" class="up btn btn-xs btn-inverse"><span class="fui-triangle-up"></span></button>\
+    //             <button type="button" class="down btn btn-xs btn-inverse"><span class="fui-triangle-down"></span></button>\
+    //             <button type="button" class="target btn btn-xs btn-primary"><span class="fui-eye"></span></button>\
+    //             <button type="button" class="delete btn btn-xs btn-danger"><span class="fui-trash"></span></button>\
+    //         </div>\
+    //         <div class="clearfix"></div>\
+    //     </div>')
+
+    // $editor.prepend(self.page.get_editor())
+    // return $editor;
 }
 

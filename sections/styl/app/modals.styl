@@ -1,0 +1,111 @@
+.__sections__
+
+    // .ui-resizable-se
+    //     h(0);
+
+    &.ui-dialog
+        bd(2,2,2,2,solid,#16a085); rad(10,10,10,10); bg(#F0F0F0); tal(); bs-lt(); ov(); p(0); m(0);
+        z(1000000);
+        position: fixed !important;
+        max-height: 500px !important;
+        &:focus
+            outline: none;
+
+        .ui-dialog-content
+            cl(); rad(0,0,10,10); wh(auto !important, 100%);
+
+        .ui-dialog-titlebar
+            p(0,0,0,20); rl(); m(0); rad(5,5,0,0)
+            //ab(-39,10,,10);
+            bd(0); bd(2,2,2,2,solid,#16a085);
+            bg(#16A085); cur(pointer); fg(white);
+
+        // .ui-dialog-titlebar-close
+        //     ab(10,10,0,0); l(auto); ct("x");
+        //     rad(10); bg(url(../sections/img/close.png) center center);
+
+
+        .sections-modal-foot, .sections-modal-footer
+            pt(10); mt(10); cl(); bt(1,solid,#16a085)
+            .button2, .button
+                ml(7);
+
+        .form-inline
+            display: table;
+            mb(5);
+
+            .form-group
+                display: table-row;
+
+                .input-group
+                    display: table;
+
+                    .input-group-addon, .form-control
+                          display: table-cell;
+
+// &.sections-modal
+//     dn(); m(0, auto); bs-lt(); bg(white); tal(); rad(10,10,10,10); wr(auto,auto,600,600); rl(); z(1000001);
+//     cur(default);
+
+// .___modal_blocker
+//     fx(0,0,0,0,1000000); bg(rgba(52, 73, 94, 0.51)); wh(100%); vam();  op(0); tr-cl(); cur(pointer);
+//     overflow:auto;
+//     &.in
+//         op(1);
+
+//     &.loading
+//         tac();
+
+//     .___modal_wrapper
+//         rl(); tac(); m(10); ts(translate3d(0,-55%,0)); op(1); tr-cl();//bs(0 0 10px #000);
+//         @media screen-md-min
+//             m(30,auto);
+//         &.in
+//             op(1); ts(translate3d(0,0,0));
+
+// .___modal_open_body
+//     oh();
+
+
+// &.sections-modal
+//     dn(); m(0, auto); bs-lt(); bg(white); tal(); rad(10,10,10,10); wr(auto,auto,600,600); rl(); z(1000001);
+//     cur(default);
+
+//     bd(2,2,2,2,solid,#16a085);
+
+//     &.in
+//         db();
+
+//     .sections-modal-head, .sections-modal-header
+//         p(20, 20); tal(); fs(18); fg(#666666); rad(10,10,0,0); bb(1,solid,#F0F0F0)
+
+
+//     .sections-modal-foot, .sections-modal-footer
+//         p(20,20); cl(); rad(0,0,10,10); bg(#F0F0F0);
+//         .button2, .button
+//             ml(7);
+
+//     .sections-modal-content
+//         p(20, 20); cl();
+
+//     .sections-modal-close
+//         ab(5,12,,,10000); wh(30); db(); fg(grey-dk); tr-cl(); fs(30); cur(pointer);
+//         &:hover
+//             fg(white);
+//         &.black
+//             fg(black);
+//             &:hover
+//                 fg(white);
+
+// modal-colorize(color-name, color)
+//     {"&."+color-name}
+//         .sections-modal-head, .sections-modal-title, .sections-modal-foot
+//             bg(color);
+
+// modal-colorize('blue', blue);
+// modal-colorize('teal', teal);
+// modal-colorize('orange', orange);
+// modal-colorize('green', green);
+// modal-colorize('grey', grey-dk);
+// modal-colorize('red', red);
+// modal-colorize('white', white);

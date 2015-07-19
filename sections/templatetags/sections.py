@@ -1,6 +1,7 @@
 from django.template.defaulttags import register
 import json
 
+
 @register.filter
 def get_item(dictionary, key):
     if dictionary:
@@ -28,10 +29,12 @@ def render_section(context, section, layout=False):
     else:
         return ""
 
-@register.assignment_tag
-def get_root_pages():
+@register.assignment_tag(takes_context=True)
+def get_root_pages(context):
+    request = context['request']
     from ..models import Page
-    sections_pages = Page.objects.select_related('children').filter(is_enabled=True, parent=None)
+    from ..utils import get_current_version, get_active_version
+    sections_pages = Page.objects.select_related('parent').filter(is_enabled=True, parent=None, version=get_current_version(request))
     print sections_pages
     return sections_pages
 

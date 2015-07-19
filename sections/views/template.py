@@ -37,6 +37,92 @@ logger = logging.getLogger(__name__)
 
 
 
+# TEMPLATES
+@login_required
+@csrf_exempt
+def list(request):
+    categories = TemplateCategory.objects.exclude(is_ghost=True, version=get_current_version(request))
+    return JsonResponse([category.to_json() for category in categories], safe=False)
+
+@require_POST
+@login_required
+@csrf_exempt
+def category_create(request):
+    data = json.loads(request.body)
+    category = TemplateCategory()
+    category.name = data.get('name', 'Nouveau template')
+    category.save()
+    return JsonResponse(category.to_json(), safe=False)
+
+@require_POST
+@login_required
+@csrf_exempt
+def category_update(request):
+    data = json.loads(request.body)
+    category = TemplateCategory.objects.get(pk=data.get('pk'))
+    category.name = data.get('name', template.name)
+    category.save()
+    return JsonResponse(category.to_json())
+
+@require_POST
+@login_required
+@csrf_exempt
+def category_remove(request, pk):
+    data = json.loads(request.body)
+    category = TemplateCategory.objects.get(pk=data.get('pk'))
+    category.delete()
+    return JsonResponse({})
+
+@require_POST
+@login_required
+@csrf_exempt
+def create(request):
+    data = json.loads(request.body)
+    category = TemplateCategory.objects.get(pk=data.get('category'))
+    template = Template()
+    template.category = category
+    template.source = data.get('source', 'Nouveau template')
+    template.css = data.get('css', '')
+    template.name = data.get('name', 'Nouveau template')
+    template.save()
+    return JsonResponse(template.to_json(), safe=False)
+
+@require_POST
+@login_required
+@csrf_exempt
+def update(request):
+    data = json.loads(request.body)
+    template = Template.objects.get(pk=data.get('pk'))
+    template.source = data.get('source', template.source)
+    template.css = data.get('css', template.css)
+    template.name = data.get('name', template.name)
+    template.save()
+    return JsonResponse(template.to_json())
+
+@require_POST
+@login_required
+@csrf_exempt
+def remove(request, pk):
+    data = json.loads(request.body)
+    template = Template.objects.get(pk=data.get('pk'))
+    template.delete()
+    return JsonResponse({})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class TemplateCategorySidebarList(generic.ListView):
     template_name = "sections/templates/_category_sidebar_list.html"

@@ -91,7 +91,7 @@ class PageAdmin(admin.ModelAdmin):
     #prepopulated_fields = {'slug': ('name',)}
     #inlines = (SubPageInline, ModuleInline,)
     suit_form_includes = (
-         ('section/_admin_sections.html', 'bottom', ''),
+         # ('section/_admin_sections.html', 'bottom', ''),
     )
 
     # suit_form_tabs = (

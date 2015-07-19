@@ -30,23 +30,45 @@ from django.template import Context, RequestContext, Template as DjangoTemplate
 
 
 
-from sections.models import Version
+from sections.models import Version, Page
 
 logger = logging.getLogger(__name__)
 
+def get_current_page(request):
+    if request.session.get('__sections_current_page__'):
+        return Page.objects.get(pk=request.session.get('__sections_current_page__'))
+    else:
+        return None
+
+def set_current_page(request, page):
+    request.session['__sections_current_page__'] = page.pk
+
+
 def get_current_version(request):
     if not request.session.get('__sections_current_version__'):
-        active_version = get_active_version()
-        request.session['__sections_current_version__'] = active_version.pk
+        current_version = get_active_version()
+        request.session['__sections_current_version__'] = current_version.pk
+    else:
+        current_version = request.session['__sections_current_version__']
+        current_version = Version.objects.get(pk=request.session.get('__sections_current_version__'))
 
-    return Version.objects.get(pk=request.session.get('__sections_current_version__'))
+    current_version.is_current = True
 
+    return current_version
 
 def set_current_version(request, version):
+    version.is_current = True
     request.session['__sections_current_version__'] = version.pk
 
+
+def set_active_version(version):
+    version.active = True
+    version.save()
+
 def get_active_version():
-    version = Version.objects.filter(active=True).first()
+    version = Version.objects.filter(active=True).last()
     if not version:
         version = Version.objects.last()
+        version.active = True
+        version.save()
     return version

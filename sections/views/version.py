@@ -31,5 +31,75 @@ from django.template import Context, RequestContext, Template as DjangoTemplate
 
 
 from sections.models import Version, Page, Section, Template, TemplateCategory, SectionImage
-
+from sections.utils import  get_active_version, get_current_version, set_current_version, set_active_version
 logger = logging.getLogger(__name__)
+
+# PAGES
+@login_required
+@csrf_exempt
+def list(request):
+    versions = []
+    current = get_current_version(request)
+    active = get_active_version()
+    # Version.tree.rebuild()
+    for version in Version.objects.filter(parent=None):
+
+        versions.append(version.to_json(current))
+
+    return JsonResponse(versions, safe=False)
+
+@require_POST
+@login_required
+@csrf_exempt
+def create(request):
+    data = json.loads(request.body)
+    if data.get('parent'):
+        parent = Version.objects.get(pk=data.get('parent'))
+        version = Version()
+        version.parent = parent
+        last = version.parent.children.last()
+        version.number = last.number + 1 if last else 1
+    else:
+        version = Version()
+        last_version = Version.objects.filter(parent=None).last()
+        if last_version:
+            version.number = last_version.number + 1
+        else:
+            version.number = 1
+
+    set_current_version(request, version)
+    version.save()
+
+    # if version.parent:
+    #     pages = []
+    #     for page in version.parent.pages.filter(parent=None):
+    #         page.clone(version)
+
+    set_current_version(request, version)
+
+    return JsonResponse(version.to_json(), safe=False)
+
+
+@require_POST
+@login_required
+@csrf_exempt
+def set_current(request):
+    data = json.loads(request.body)
+    version = Version.objects.get(pk=data.get('pk'))
+    set_current_version(request, version)
+    version.save()
+    return JsonResponse(version.to_json(), safe=False)
+
+@require_POST
+@login_required
+@csrf_exempt
+def set_active(request):
+    data = json.loads(request.body)
+    version = Version.objects.get(pk=data.get('pk'))
+    set_active_version(version)
+    version.save()
+    return JsonResponse(version.to_json(), safe=False)
+
+
+
+

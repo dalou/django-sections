@@ -9,7 +9,7 @@
         <link href="{{ STATIC_URL }}builtin/images/favicon.ico" rel="icon">
         <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
         <link href="{{ STATIC_URL }}sections/vendors/dropzone.css" rel="stylesheet">
-        <link href="{{ STATIC_URL }}sections/vendors/tooltipster.css" rel="stylesheet">
+        <link id="tooltipster_css" href="{{ STATIC_URL }}sections/vendors/tooltipster.css" rel="stylesheet">
         <link href="{{ STATIC_URL }}sections/vendors/flat-ui/css/flat-ui.min.css" rel="stylesheet">
         <link href="{{ STATIC_URL }}sections/vendors/colpick.css" rel="stylesheet">
         <link href="{{ STATIC_URL }}sections/vendors/layout-default-latest.css" rel="stylesheet">
@@ -46,6 +46,7 @@
         <script src="{{ STATIC_URL }}sections/js/tooltips.js"></script>
         <script src="{{ STATIC_URL }}sections/js/templates.js"></script>
         <script src="{{ STATIC_URL }}sections/js/pages.js"></script>
+        <script src="{{ STATIC_URL }}sections/js/loading.js"></script>
         <script src="{{ STATIC_URL }}sections/js/sections.js"></script>
         <script src="{{ STATIC_URL }}sections/js/elements.js"></script>
         <script src="{{ STATIC_URL }}sections/js/editor.js"></script>
@@ -68,76 +69,75 @@
 
     <body id="home" data-offset="80" data-target=".navbar" data-spy="scroll">
         <div class="ui-layout-north">
-        <nav class="navbar navbar-inverse navbar-embossed" role="navigation">
-            <!-- <div class="navbar-header">
-              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
-                <span class="sr-only">Toggle navigation</span>
-              </button>
-              <a class="navbar-brand" href="#">Page editor</a>
-            </div> -->
-            <div class="collapse navbar-collapse" id="navbar-collapse-01">
-                <ul class="nav navbar-nav navbar-left">
+            <div class="__sections__">
+                <nav class="navbar navbar-inverse navbar-embossed" role="navigation">
+                    <!-- <div class="navbar-header">
+                      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-01">
+                        <span class="sr-only">Toggle navigation</span>
+                      </button>
+                      <a class="navbar-brand" href="#">Page editor</a>
+                    </div> -->
+                    <div class="collapse navbar-collapse" id="navbar-collapse-01">
+                        <ul class="nav navbar-nav navbar-left">
 
-                    <li><a href="#fakelink"><span class="fui-home"></span></a></li>
+                            <li><a href="#fakelink"><span class="fui-home"></span></a></li>
 
 
-                    <!--<li class="dropdown" id="version-menu">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="page_root">
-                            <span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Pages <b class="caret"></b>
-                        </a>
-                        <span class="dropdown-arrow"></span>
-                        <ul class="editor-pages-menu dropdown-menu">
-                            <li class="pages-add">
-                                <a>
-                                    <span class="fui-plus"></span>
-                                </a>
+
+
+                            {% include "sections/versions/_root_menu.html" %}
+                            {% include "sections/pages/_root_menu.html" %}
+
+
+                            <li id="add_section">
+                                <div id="page-settings-menu">
+
+
+                                </div>
                             </li>
                         </ul>
-                    </li>-->
+                        <ul class="nav navbar-nav navbar-right">
 
-                    {% include "sections/versions/_root_menu.html" %}
-                    {% include "sections/pages/_root_menu.html" %}
-                    <li id="add_section"></li>
-                </ul>
-                <ul class="nav navbar-nav navbar-right">
+                            {% include "sections/templates/_root_menu.html" %}
 
-                    {% include "sections/templates/_root_menu.html" %}
-
-                    <!-- <li class="dropdown" >
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="template_category_root">
-                            Templates <b class="caret"></b>
-                        </a>
-                        <span class="dropdown-arrow"></span>
-                        <ul id="template-categories-menu" class="editor-pages-menu dropdown-menu">
-                            <li class="template-categories-add">
-                                <a>
-                                    <span class="fui-plus"></span>
+                            <!-- <li class="dropdown" >
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="template_category_root">
+                                    Templates <b class="caret"></b>
                                 </a>
+                                <span class="dropdown-arrow"></span>
+                                <ul id="template-categories-menu" class="editor-pages-menu dropdown-menu">
+                                    <li class="template-categories-add">
+                                        <a>
+                                            <span class="fui-plus"></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li> -->
+                            <li id="">
+                                <a href="{% url "admin:auth_user_changelist" %}">Users</a>
                             </li>
                         </ul>
-                    </li> -->
-                    <li id="">
-                        <a href="{% url "admin:auth_user_changelist" %}">Users</a>
-                    </li>
-                </ul>
 
-               <!--<form class="navbar-form navbar-right" action="#" role="search">
+                       <!--<form class="navbar-form navbar-right" action="#" role="search">
 
-                 <div class="form-group">
-                  <div class="input-group">
-                    <input class="form-control" id="navbarInput-01" type="search" placeholder="Search">
-                    <span class="input-group-btn">
-                      <button type="submit" class="btn"><span class="fui-search"></span></button>
+                         <div class="form-group">
+                          <div class="input-group">
+                            <input class="form-control" id="navbarInput-01" type="search" placeholder="Search">
+                            <span class="input-group-btn">
+                              <button type="submit" class="btn"><span class="fui-search"></span></button>
 
-                    </span>
-                  </div>
-                </div>
-                <a href="#" id="editor_save" class="btn btn-primary btn-embossed pull-right actionButtons"><span class="fui-check"></span> <span class="bLabel">Save changes (!)</span></a>
-              </form>-->
-            </div><!-- /.navbar-collapse -->
-          </nav>
-      </div>
+                            </span>
+                          </div>
+                        </div>
+                        <a href="#" id="editor_save" class="btn btn-primary btn-embossed pull-right actionButtons"><span class="fui-check"></span> <span class="bLabel">Save changes (!)</span></a>
+                      </form>-->
+                    </div><!-- /.navbar-collapse -->
+                </nav>
+            </div>
        <div id="sidebar">
+            <a href="#" class="close modal-close close-editor">
+                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+            </a>
             <div id="editor">
             </div>
             <div id="split-bar"></div>
@@ -145,9 +145,9 @@
 
        <div id="main">
 
-            <div id="page-settings-menu">
-
-
+            <div id="context-menu">
+                <ul>
+                </ul>
             </div>
             <iframe id="page" src=""></iframe>
         </div>
